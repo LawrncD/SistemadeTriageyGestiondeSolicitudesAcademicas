@@ -20,13 +20,21 @@ import java.util.List;
  * RF-08: Cierre con observación, solicitud cerrada no se modifica.
  */
 @Entity
-@Table(name = "solicitudes")
+@Table(name = "solicitudes", indexes = {
+    @Index(name = "idx_solicitud_estado", columnList = "estado"),
+    @Index(name = "idx_solicitud_responsable", columnList = "responsable_id"),
+    @Index(name = "idx_solicitud_solicitante", columnList = "solicitante_id"),
+    @Index(name = "idx_solicitud_fecha_registro", columnList = "fechaRegistro")
+})
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Solicitud {
+
+    @Version
+    private Long version;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -106,5 +114,45 @@ public class Solicitud {
     public void agregarHistorial(HistorialSolicitud entrada) {
         historial.add(entrada);
         entrada.setSolicitud(this);
+    }
+
+    /**
+     * RF-02 y RF-03: Clasifica la solicitud y asigna prioridad inicial.
+     */
+    public void clasificar(TipoSolicitud tipoSolicitud, Prioridad prioridad, String justificacionPrioridad) {
+        this.tipoSolicitud = tipoSolicitud;
+        this.prioridad = prioridad;
+        this.justificacionPrioridad = justificacionPrioridad;
+        this.estado = EstadoSolicitud.CLASIFICADA;
+    }
+
+    /**
+     * RF-03: Ajusta manualmente la prioridad y su justificación.
+     */
+    public void asignarPrioridad(Prioridad prioridad, String justificacion) {
+        this.prioridad = prioridad;
+        this.justificacionPrioridad = justificacion;
+    }
+
+    /**
+     * RF-04: Actualiza el estado dentro del ciclo de vida.
+     */
+    public void transicionarEstado(EstadoSolicitud nuevoEstado) {
+        this.estado = nuevoEstado;
+    }
+
+    /**
+     * RF-05: Asigna un responsable a la solicitud.
+     */
+    public void asignarResponsable(Usuario responsable) {
+        this.responsable = responsable;
+    }
+
+    /**
+     * RF-08: Cierra formalmente la solicitud con observación.
+     */
+    public void cerrar(String observacionCierre) {
+        this.estado = EstadoSolicitud.CERRADA;
+        this.observacionCierre = observacionCierre;
     }
 }

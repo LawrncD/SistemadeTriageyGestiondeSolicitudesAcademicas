@@ -18,10 +18,6 @@ public class ClasificacionRequestDTO {
     @NotNull(message = "El tipo de solicitud es obligatorio")
     private TipoSolicitud tipoSolicitud;
 
-    /** ID del usuario que realiza la clasificación */
-    @NotNull(message = "El ID del usuario clasificador es obligatorio")
-    private Long usuarioId;
-
     /** Observaciones opcionales sobre la clasificación */
     private String observaciones;
 }

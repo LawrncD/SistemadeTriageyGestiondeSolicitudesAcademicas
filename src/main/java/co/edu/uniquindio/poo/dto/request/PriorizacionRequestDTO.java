@@ -21,7 +21,4 @@ public class PriorizacionRequestDTO {
 
     @NotBlank(message = "La justificación de la prioridad es obligatoria")
     private String justificacion;
-
-    @NotNull(message = "El ID del usuario es obligatorio")
-    private Long usuarioId;
 }

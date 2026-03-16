@@ -85,4 +85,16 @@ class PriorizacionServiceTest {
         assertNotNull(resultado[1]);
         assertFalse(((String) resultado[1]).isEmpty());
     }
+
+    @Test
+    @DisplayName("RF-03: Señales semánticas de urgencia elevan la prioridad")
+    void descripcionConUrgencia_DebeElevarPrioridad() {
+        Solicitud solicitud = Solicitud.builder()
+                .tipoSolicitud(TipoSolicitud.CONSULTA_ACADEMICA)
+                .descripcion("Caso urgente por cierre de matricula inminente")
+                .build();
+
+        Object[] resultado = priorizacionService.calcularPrioridad(solicitud);
+        assertEquals(Prioridad.MEDIA, resultado[0]);
+    }
 }

@@ -2,6 +2,7 @@ package co.edu.uniquindio.poo.controller;
 
 import co.edu.uniquindio.poo.dto.request.*;
 import co.edu.uniquindio.poo.dto.response.ApiResponseDTO;
+import co.edu.uniquindio.poo.dto.response.PageResponseDTO;
 import co.edu.uniquindio.poo.dto.response.SolicitudResponseDTO;
 import co.edu.uniquindio.poo.model.enums.EstadoSolicitud;
 import co.edu.uniquindio.poo.model.enums.Prioridad;
@@ -159,6 +160,27 @@ public class SolicitudController {
 
         return ResponseEntity.ok(ApiResponseDTO.exitoso(
                 "Se encontraron " + response.size() + " solicitudes", response));
+    }
+
+    /**
+     * Consulta solicitudes de forma paginada con filtros opcionales.
+     */
+    @GetMapping("/paginado")
+    public ResponseEntity<ApiResponseDTO<PageResponseDTO<SolicitudResponseDTO>>> consultarSolicitudesPaginado(
+            @RequestParam(name = "estado", required = false) EstadoSolicitud estado,
+            @RequestParam(name = "tipo", required = false) TipoSolicitud tipo,
+            @RequestParam(name = "prioridad", required = false) Prioridad prioridad,
+            @RequestParam(name = "responsableId", required = false) Long responsableId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", defaultValue = "fechaRegistro") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction) {
+
+        PageResponseDTO<SolicitudResponseDTO> response = solicitudService.consultarConFiltrosPaginado(
+                estado, tipo, prioridad, responsableId, page, size, sortBy, direction
+        );
+
+        return ResponseEntity.ok(ApiResponseDTO.exitoso("Consulta paginada de solicitudes", response));
     }
 
     /**

@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,9 +35,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/**").permitAll()
-                        .anyRequest().permitAll()
-                );
+                    .requestMatchers(HttpMethod.POST, "/api/solicitudes").hasAnyRole("ESTUDIANTE", "ADMINISTRATIVO", "RESPONSABLE")
+                    .requestMatchers(HttpMethod.GET, "/api/solicitudes/**").hasAnyRole("ESTUDIANTE", "DOCENTE", "ADMINISTRATIVO", "RESPONSABLE")
+                    .requestMatchers(HttpMethod.PUT, "/api/solicitudes/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
+                    .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRATIVO")
+                    .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
+                    .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRATIVO")
+                    .requestMatchers(HttpMethod.GET, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
+                    .requestMatchers(HttpMethod.POST, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
+                    .anyRequest().authenticated()
+                )
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

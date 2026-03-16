@@ -1,6 +1,7 @@
 package co.edu.uniquindio.poo.service;
 
 import co.edu.uniquindio.poo.dto.request.*;
+import co.edu.uniquindio.poo.dto.response.PageResponseDTO;
 import co.edu.uniquindio.poo.dto.response.SolicitudResponseDTO;
 import co.edu.uniquindio.poo.exception.*;
 import co.edu.uniquindio.poo.mapper.EntityMapper;
@@ -10,9 +11,14 @@ import co.edu.uniquindio.poo.model.entity.Usuario;
 import co.edu.uniquindio.poo.model.enums.*;
 import co.edu.uniquindio.poo.repository.SolicitudRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,6 +43,7 @@ public class SolicitudService {
     private final SolicitudRepository solicitudRepository;
     private final UsuarioService usuarioService;
     private final PriorizacionService priorizacionService;
+    private final ActorContextService actorContextService;
     private final EntityMapper mapper;
 
     // ==================== RF-01: REGISTRO DE SOLICITUDES ====================
@@ -49,6 +56,10 @@ public class SolicitudService {
     public SolicitudResponseDTO registrarSolicitud(SolicitudRequestDTO request) {
         // Verificar que el solicitante existe
         Usuario solicitante = usuarioService.buscarUsuarioPorId(request.getSolicitanteId());
+
+        if (request.getFechaLimite() != null && request.getFechaLimite().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha límite no puede ser anterior a la fecha actual");
+        }
 
         // Crear la solicitud con estado inicial REGISTRADA
         Solicitud solicitud = Solicitud.builder()
@@ -81,7 +92,7 @@ public class SolicitudService {
      */
     public SolicitudResponseDTO clasificarSolicitud(Long solicitudId, ClasificacionRequestDTO request) {
         Solicitud solicitud = buscarSolicitudPorId(solicitudId);
-        Usuario usuario = usuarioService.buscarUsuarioPorId(request.getUsuarioId());
+        Usuario usuario = actorContextService.obtenerActorActual();
 
         // RF-08: Verificar que no esté cerrada
         validarNoEstaCerrada(solicitud);
@@ -89,14 +100,16 @@ public class SolicitudService {
         // RF-04: Validar transición de estado
         validarTransicion(solicitud, EstadoSolicitud.CLASIFICADA);
 
-        // Aplicar clasificación
+        // RF-02: Establecer tipo para calcular prioridad sobre la solicitud clasificada
         solicitud.setTipoSolicitud(request.getTipoSolicitud());
-        solicitud.setEstado(EstadoSolicitud.CLASIFICADA);
 
         // RF-03: Calcular prioridad automáticamente basada en reglas
         Object[] resultado = priorizacionService.calcularPrioridad(solicitud);
-        solicitud.setPrioridad((Prioridad) resultado[0]);
-        solicitud.setJustificacionPrioridad((String) resultado[1]);
+        solicitud.clasificar(
+            request.getTipoSolicitud(),
+            (Prioridad) resultado[0],
+            (String) resultado[1]
+        );
 
         // RF-06: Registrar en historial
         HistorialSolicitud historial = crearEntradaHistorial(
@@ -120,13 +133,12 @@ public class SolicitudService {
      */
     public SolicitudResponseDTO priorizarSolicitud(Long solicitudId, PriorizacionRequestDTO request) {
         Solicitud solicitud = buscarSolicitudPorId(solicitudId);
-        Usuario usuario = usuarioService.buscarUsuarioPorId(request.getUsuarioId());
+        Usuario usuario = actorContextService.obtenerActorActual();
 
         validarNoEstaCerrada(solicitud);
 
         Prioridad prioridadAnterior = solicitud.getPrioridad();
-        solicitud.setPrioridad(request.getPrioridad());
-        solicitud.setJustificacionPrioridad(request.getJustificacion());
+        solicitud.asignarPrioridad(request.getPrioridad(), request.getJustificacion());
 
         // RF-06: Registrar en historial
         String accion = prioridadAnterior != null
@@ -150,13 +162,13 @@ public class SolicitudService {
      */
     public SolicitudResponseDTO cambiarEstado(Long solicitudId, CambioEstadoRequestDTO request) {
         Solicitud solicitud = buscarSolicitudPorId(solicitudId);
-        Usuario usuario = usuarioService.buscarUsuarioPorId(request.getUsuarioId());
+        Usuario usuario = actorContextService.obtenerActorActual();
 
         validarNoEstaCerrada(solicitud);
         validarTransicion(solicitud, request.getNuevoEstado());
 
         EstadoSolicitud estadoAnterior = solicitud.getEstado();
-        solicitud.setEstado(request.getNuevoEstado());
+        solicitud.transicionarEstado(request.getNuevoEstado());
 
         // RF-06: Registrar en historial
         HistorialSolicitud historial = crearEntradaHistorial(
@@ -179,7 +191,7 @@ public class SolicitudService {
     public SolicitudResponseDTO asignarResponsable(Long solicitudId, AsignacionRequestDTO request) {
         Solicitud solicitud = buscarSolicitudPorId(solicitudId);
         Usuario responsable = usuarioService.buscarUsuarioPorId(request.getResponsableId());
-        Usuario asignador = usuarioService.buscarUsuarioPorId(request.getUsuarioAsignadorId());
+        Usuario asignador = actorContextService.obtenerActorActual();
 
         validarNoEstaCerrada(solicitud);
 
@@ -196,7 +208,7 @@ public class SolicitudService {
                     "El usuario no tiene un rol válido para ser responsable de una solicitud");
         }
 
-        solicitud.setResponsable(responsable);
+        solicitud.asignarResponsable(responsable);
 
         // RF-06: Registrar asignación en historial
         HistorialSolicitud historial = crearEntradaHistorial(
@@ -219,7 +231,7 @@ public class SolicitudService {
      */
     public SolicitudResponseDTO cerrarSolicitud(Long solicitudId, CierreRequestDTO request) {
         Solicitud solicitud = buscarSolicitudPorId(solicitudId);
-        Usuario usuario = usuarioService.buscarUsuarioPorId(request.getUsuarioId());
+        Usuario usuario = actorContextService.obtenerActorActual();
 
         // RF-08: Verificar que la solicitud esté en estado ATENDIDA
         if (solicitud.getEstado() != EstadoSolicitud.ATENDIDA) {
@@ -229,8 +241,7 @@ public class SolicitudService {
         }
 
         // Aplicar cierre
-        solicitud.setEstado(EstadoSolicitud.CERRADA);
-        solicitud.setObservacionCierre(request.getObservacionCierre());
+        solicitud.cerrar(request.getObservacionCierre());
 
         // RF-06: Registrar cierre en historial
         HistorialSolicitud historial = crearEntradaHistorial(
@@ -300,6 +311,43 @@ public class SolicitudService {
     public List<SolicitudResponseDTO> consultarPorResponsable(Long responsableId) {
         return mapper.toSolicitudDTOList(solicitudRepository.findByResponsableId(responsableId));
     }
+
+        /**
+         * RF-07: Consulta paginada con filtros opcionales.
+         */
+        @Transactional(readOnly = true)
+        public PageResponseDTO<SolicitudResponseDTO> consultarConFiltrosPaginado(
+            EstadoSolicitud estado,
+            TipoSolicitud tipo,
+            Prioridad prioridad,
+            Long responsableId,
+            int page,
+            int size,
+            String sortBy,
+            String direction
+        ) {
+        String campoOrden = (sortBy == null || sortBy.isBlank()) ? "fechaRegistro" : sortBy;
+        Sort sort = "asc".equalsIgnoreCase(direction)
+            ? Sort.by(campoOrden).ascending()
+            : Sort.by(campoOrden).descending();
+
+        int pagina = Math.max(page, 0);
+        int tamano = size <= 0 ? 10 : Math.min(size, 100);
+
+        Pageable pageable = PageRequest.of(pagina, tamano, sort);
+        Page<Solicitud> resultado = solicitudRepository.buscarConFiltrosPaginado(
+            estado, tipo, prioridad, responsableId, pageable
+        );
+
+        return PageResponseDTO.<SolicitudResponseDTO>builder()
+            .contenido(mapper.toSolicitudDTOList(resultado.getContent()))
+            .numeroPagina(resultado.getNumber())
+            .tamanoPagina(resultado.getSize())
+            .totalElementos(resultado.getTotalElements())
+            .totalPaginas(resultado.getTotalPages())
+            .ultimaPagina(resultado.isLast())
+            .build();
+        }
 
     // ==================== MÉTODOS UTILITARIOS PRIVADOS ====================
 

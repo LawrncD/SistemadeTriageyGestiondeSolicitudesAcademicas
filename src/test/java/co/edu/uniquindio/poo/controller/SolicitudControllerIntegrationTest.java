@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.LocalDate;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,7 +50,7 @@ class SolicitudControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.exito").value(true))
+                .andExpect(jsonPath("$.exitoso").value(true))
                 .andExpect(jsonPath("$.datos.estado").value("REGISTRADA"))
                 .andExpect(jsonPath("$.datos.canalOrigen").value("CSU"))
                 .andExpect(jsonPath("$.datos.historial").isArray());
@@ -94,11 +96,11 @@ class SolicitudControllerIntegrationTest {
         // Clasificar
         ClasificacionRequestDTO clasificacionRequest = ClasificacionRequestDTO.builder()
                 .tipoSolicitud(TipoSolicitud.HOMOLOGACION)
-                .usuarioId(3L)
                 .observaciones("Clasificada como homologación")
                 .build();
 
         mockMvc.perform(put("/api/solicitudes/" + solicitudId + "/clasificar")
+                        .sessionAttr("usuarioId", 3L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(clasificacionRequest)))
                 .andDo(print())
@@ -133,15 +135,15 @@ class SolicitudControllerIntegrationTest {
         // Intentar saltar de REGISTRADA a EN_ATENCION
         CambioEstadoRequestDTO cambioEstado = CambioEstadoRequestDTO.builder()
                 .nuevoEstado(EstadoSolicitud.EN_ATENCION)
-                .usuarioId(3L)
                 .observaciones("Intentando saltar estado")
                 .build();
 
         mockMvc.perform(put("/api/solicitudes/" + solicitudId + "/estado")
+                        .sessionAttr("usuarioId", 3L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(cambioEstado)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.exito").value(false));
+                .andExpect(jsonPath("$.exitoso").value(false));
     }
 
     // ==================== RF-07: CONSULTAS ====================
@@ -154,7 +156,7 @@ class SolicitudControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exito").value(true))
+                .andExpect(jsonPath("$.exitoso").value(true))
                 .andExpect(jsonPath("$.datos").isArray());
     }
 
@@ -166,7 +168,7 @@ class SolicitudControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exito").value(true))
+                .andExpect(jsonPath("$.exitoso").value(true))
                 .andExpect(jsonPath("$.datos").isArray());
     }
 
@@ -179,7 +181,7 @@ class SolicitudControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exito").value(true));
+                .andExpect(jsonPath("$.exitoso").value(true));
     }
 
     // ==================== USUARIOS ====================
@@ -191,7 +193,7 @@ class SolicitudControllerIntegrationTest {
         mockMvc.perform(get("/api/usuarios")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exito").value(true))
+                .andExpect(jsonPath("$.exitoso").value(true))
                 .andExpect(jsonPath("$.datos").isArray());
     }
 
@@ -202,6 +204,39 @@ class SolicitudControllerIntegrationTest {
         mockMvc.perform(get("/api/usuarios/responsables-activos")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exito").value(true));
+                .andExpect(jsonPath("$.exitoso").value(true));
     }
+
+        @Test
+        @Order(10)
+        @DisplayName("RF-01: Registrar solicitud con fecha límite pasada debe fallar")
+        void registrarSolicitudConFechaLimitePasada_DebeRetornarBadRequest() throws Exception {
+                SolicitudRequestDTO request = SolicitudRequestDTO.builder()
+                                .descripcion("Solicitud con fecha no valida para registro")
+                                .canalOrigen(CanalOrigen.CORREO)
+                                .solicitanteId(1L)
+                                .fechaLimite(LocalDate.now().minusDays(1))
+                                .build();
+
+                mockMvc.perform(post("/api/solicitudes")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.exitoso").value(false));
+        }
+
+        @Test
+        @Order(11)
+        @DisplayName("RF-07: Consultar solicitudes paginadas")
+        void consultarSolicitudesPaginadas_DebeRetornarEstructuraPaginada() throws Exception {
+                mockMvc.perform(get("/api/solicitudes/paginado")
+                                                .param("page", "0")
+                                                .param("size", "2")
+                                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.exitoso").value(true))
+                                .andExpect(jsonPath("$.datos.contenido").isArray())
+                                .andExpect(jsonPath("$.datos.numeroPagina").value(0))
+                                .andExpect(jsonPath("$.datos.tamanoPagina").value(2));
+        }
 }

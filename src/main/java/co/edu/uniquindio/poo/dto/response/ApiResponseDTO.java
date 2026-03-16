@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponseDTO<T> {
 
-    private boolean exito;
+    private boolean exitoso;
     private String mensaje;
     private T datos;
     private LocalDateTime timestamp;
@@ -27,7 +27,7 @@ public class ApiResponseDTO<T> {
      */
     public static <T> ApiResponseDTO<T> exitoso(String mensaje, T datos) {
         return ApiResponseDTO.<T>builder()
-                .exito(true)
+                .exitoso(true)
                 .mensaje(mensaje)
                 .datos(datos)
                 .timestamp(LocalDateTime.now())
@@ -39,7 +39,7 @@ public class ApiResponseDTO<T> {
      */
     public static <T> ApiResponseDTO<T> exitoso(String mensaje) {
         return ApiResponseDTO.<T>builder()
-                .exito(true)
+                .exitoso(true)
                 .mensaje(mensaje)
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -50,7 +50,7 @@ public class ApiResponseDTO<T> {
      */
     public static <T> ApiResponseDTO<T> error(String mensaje) {
         return ApiResponseDTO.<T>builder()
-                .exito(false)
+                .exitoso(false)
                 .mensaje(mensaje)
                 .timestamp(LocalDateTime.now())
                 .build();

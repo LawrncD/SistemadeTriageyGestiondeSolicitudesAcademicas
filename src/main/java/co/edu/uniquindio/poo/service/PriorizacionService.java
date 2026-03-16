@@ -34,6 +34,9 @@ public class PriorizacionService {
         // Regla 2: Prioridad por fecha límite
         puntaje += calcularPuntajePorFechaLimite(solicitud.getFechaLimite(), justificacion);
 
+        // Regla 3: Señales semánticas de urgencia en la descripción
+        puntaje += calcularPuntajePorDescripcion(solicitud.getDescripcion(), justificacion);
+
         // Determinar prioridad según puntaje total
         Prioridad prioridad = determinarPrioridad(puntaje);
         justificacion.insert(0, String.format("Puntaje total: %d. ", puntaje));
@@ -101,6 +104,35 @@ public class PriorizacionService {
             justificacion.append("Fecha límite lejana (+1). ");
             return 1;
         }
+    }
+
+    /**
+     * Calcula puntaje adicional por señales de urgencia presentes en la descripción.
+     */
+    private int calcularPuntajePorDescripcion(String descripcion, StringBuilder justificacion) {
+        if (descripcion == null || descripcion.isBlank()) {
+            justificacion.append("Descripción sin señales de urgencia (+0). ");
+            return 0;
+        }
+
+        String texto = descripcion.toLowerCase();
+        int puntaje = 0;
+
+        if (texto.contains("urgente") || texto.contains("inminente")) {
+            puntaje += 2;
+        }
+
+        if (texto.contains("matricula") || texto.contains("cierre")) {
+            puntaje += 1;
+        }
+
+        if (puntaje > 0) {
+            justificacion.append("Descripción con señales de urgencia (+").append(puntaje).append("). ");
+        } else {
+            justificacion.append("Descripción sin señales de urgencia (+0). ");
+        }
+
+        return puntaje;
     }
 
     /**

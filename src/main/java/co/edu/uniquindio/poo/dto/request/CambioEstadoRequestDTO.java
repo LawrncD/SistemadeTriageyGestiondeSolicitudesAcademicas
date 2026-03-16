@@ -18,9 +18,6 @@ public class CambioEstadoRequestDTO {
     @NotNull(message = "El nuevo estado es obligatorio")
     private EstadoSolicitud nuevoEstado;
 
-    @NotNull(message = "El ID del usuario es obligatorio")
-    private Long usuarioId;
-
     /** Observaciones sobre el cambio de estado */
     private String observaciones;
 }

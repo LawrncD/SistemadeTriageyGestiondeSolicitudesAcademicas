@@ -4,6 +4,8 @@ import co.edu.uniquindio.poo.model.entity.Solicitud;
 import co.edu.uniquindio.poo.model.enums.EstadoSolicitud;
 import co.edu.uniquindio.poo.model.enums.Prioridad;
 import co.edu.uniquindio.poo.model.enums.TipoSolicitud;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -44,6 +46,20 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
             @Param("tipo") TipoSolicitud tipo,
             @Param("prioridad") Prioridad prioridad,
             @Param("responsableId") Long responsableId
+    );
+
+    /** Consulta combinada con filtros opcionales y paginación */
+    @Query("SELECT s FROM Solicitud s WHERE " +
+            "(:estado IS NULL OR s.estado = :estado) AND " +
+            "(:tipo IS NULL OR s.tipoSolicitud = :tipo) AND " +
+            "(:prioridad IS NULL OR s.prioridad = :prioridad) AND " +
+            "(:responsableId IS NULL OR s.responsable.id = :responsableId)")
+    Page<Solicitud> buscarConFiltrosPaginado(
+            @Param("estado") EstadoSolicitud estado,
+            @Param("tipo") TipoSolicitud tipo,
+            @Param("prioridad") Prioridad prioridad,
+            @Param("responsableId") Long responsableId,
+            Pageable pageable
     );
 
     /** Contar solicitudes por estado */

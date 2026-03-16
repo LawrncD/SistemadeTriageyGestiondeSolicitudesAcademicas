@@ -17,9 +17,6 @@ public class AsignacionRequestDTO {
     @NotNull(message = "El ID del responsable es obligatorio")
     private Long responsableId;
 
-    @NotNull(message = "El ID del usuario que asigna es obligatorio")
-    private Long usuarioAsignadorId;
-
     /** Observaciones opcionales sobre la asignación */
     private String observaciones;
 }
