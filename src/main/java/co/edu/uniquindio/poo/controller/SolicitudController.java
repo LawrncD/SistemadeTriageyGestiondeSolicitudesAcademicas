@@ -2,12 +2,15 @@ package co.edu.uniquindio.poo.controller;
 
 import co.edu.uniquindio.poo.dto.request.*;
 import co.edu.uniquindio.poo.dto.response.ApiResponseDTO;
+import co.edu.uniquindio.poo.dto.response.HistorialResponseDTO;
 import co.edu.uniquindio.poo.dto.response.PageResponseDTO;
 import co.edu.uniquindio.poo.dto.response.SolicitudResponseDTO;
 import co.edu.uniquindio.poo.model.enums.EstadoSolicitud;
 import co.edu.uniquindio.poo.model.enums.Prioridad;
 import co.edu.uniquindio.poo.model.enums.TipoSolicitud;
 import co.edu.uniquindio.poo.service.SolicitudService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,7 +39,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/solicitudes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Permitir acceso desde Angular (Hito 3)
+@CrossOrigin(origins = "*")
+@Tag(name = "Solicitudes Académicas", description = "API para la gestión del ciclo de vida de solicitudes académicas")
 public class SolicitudController {
 
     private final SolicitudService solicitudService;
@@ -47,6 +51,7 @@ public class SolicitudController {
      * Registra una nueva solicitud académica.
      * RF-01: Canal de origen, descripción, solicitante, fecha automática.
      */
+    @Operation(summary = "RF-01: Registrar solicitud", description = "Registra una nueva solicitud académica con estado inicial REGISTRADA")
     @PostMapping
     public ResponseEntity<ApiResponseDTO<SolicitudResponseDTO>> registrarSolicitud(
             @Valid @RequestBody SolicitudRequestDTO request) {
@@ -62,6 +67,7 @@ public class SolicitudController {
      * RF-02: Asigna tipo y cambia estado a CLASIFICADA.
      * RF-03: Calcula prioridad automáticamente.
      */
+    @Operation(summary = "RF-02: Clasificar solicitud", description = "Asigna tipo de solicitud y calcula prioridad automáticamente")
     @PutMapping("/{id}/clasificar")
     public ResponseEntity<ApiResponseDTO<SolicitudResponseDTO>> clasificarSolicitud(
             @PathVariable Long id,
@@ -76,6 +82,7 @@ public class SolicitudController {
      * Ajusta manualmente la prioridad de una solicitud.
      * RF-03: Priorización con justificación obligatoria.
      */
+    @Operation(summary = "RF-03: Priorizar solicitud", description = "Ajusta manualmente la prioridad con justificación obligatoria")
     @PutMapping("/{id}/priorizar")
     public ResponseEntity<ApiResponseDTO<SolicitudResponseDTO>> priorizarSolicitud(
             @PathVariable Long id,
@@ -90,6 +97,7 @@ public class SolicitudController {
      * Cambia el estado de una solicitud validando la transición.
      * RF-04: Transiciones válidas del ciclo de vida.
      */
+    @Operation(summary = "RF-04: Cambiar estado", description = "Transiciona el estado validando coherencia del ciclo de vida")
     @PutMapping("/{id}/estado")
     public ResponseEntity<ApiResponseDTO<SolicitudResponseDTO>> cambiarEstado(
             @PathVariable Long id,
@@ -104,6 +112,7 @@ public class SolicitudController {
      * Asigna un responsable a la solicitud.
      * RF-05: Responsable activo, registro en historial.
      */
+    @Operation(summary = "RF-05: Asignar responsable", description = "Asigna un responsable activo a la solicitud")
     @PutMapping("/{id}/asignar")
     public ResponseEntity<ApiResponseDTO<SolicitudResponseDTO>> asignarResponsable(
             @PathVariable Long id,
@@ -118,6 +127,7 @@ public class SolicitudController {
      * Cierra una solicitud con observación obligatoria.
      * RF-08: Solo desde estado ATENDIDA, con observación, inmutable después.
      */
+    @Operation(summary = "RF-08: Cerrar solicitud", description = "Cierra una solicitud ATENDIDA con observación obligatoria. Inmutable después.")
     @PutMapping("/{id}/cerrar")
     public ResponseEntity<ApiResponseDTO<SolicitudResponseDTO>> cerrarSolicitud(
             @PathVariable Long id,
@@ -132,6 +142,7 @@ public class SolicitudController {
      * Obtiene una solicitud con su historial completo.
      * RF-06: Historial auditable visible.
      */
+    @Operation(summary = "Obtener solicitud por ID", description = "Retorna la solicitud con historial completo (RF-06)")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<SolicitudResponseDTO>> obtenerSolicitud(@PathVariable Long id) {
         SolicitudResponseDTO response = solicitudService.obtenerPorId(id);
@@ -139,9 +150,21 @@ public class SolicitudController {
     }
 
     /**
+     * RF-06: Obtiene el historial auditable de una solicitud.
+     */
+    @Operation(summary = "RF-06: Historial auditable", description = "Retorna el historial cronológico de acciones de una solicitud")
+    @GetMapping("/{id}/historial")
+    public ResponseEntity<ApiResponseDTO<List<HistorialResponseDTO>>> obtenerHistorial(@PathVariable Long id) {
+        List<HistorialResponseDTO> response = solicitudService.obtenerHistorial(id);
+        return ResponseEntity.ok(ApiResponseDTO.exitoso(
+                "Historial de la solicitud #" + id + " (" + response.size() + " acciones)", response));
+    }
+
+    /**
      * Consulta solicitudes con filtros opcionales.
      * RF-07: Filtro por estado, tipo, prioridad, responsable.
      */
+    @Operation(summary = "RF-07: Consultar solicitudes", description = "Consulta solicitudes con filtros opcionales por estado, tipo, prioridad y responsable")
     @GetMapping
     public ResponseEntity<ApiResponseDTO<List<SolicitudResponseDTO>>> consultarSolicitudes(
             @RequestParam(name = "estado", required = false) EstadoSolicitud estado,
@@ -165,6 +188,7 @@ public class SolicitudController {
     /**
      * Consulta solicitudes de forma paginada con filtros opcionales.
      */
+    @Operation(summary = "RF-07: Consultar paginado", description = "Consulta paginada con filtros opcionales y ordenamiento")
     @GetMapping("/paginado")
     public ResponseEntity<ApiResponseDTO<PageResponseDTO<SolicitudResponseDTO>>> consultarSolicitudesPaginado(
             @RequestParam(name = "estado", required = false) EstadoSolicitud estado,

@@ -1,6 +1,7 @@
 package co.edu.uniquindio.poo.service;
 
 import co.edu.uniquindio.poo.dto.request.*;
+import co.edu.uniquindio.poo.dto.response.HistorialResponseDTO;
 import co.edu.uniquindio.poo.dto.response.PageResponseDTO;
 import co.edu.uniquindio.poo.dto.response.SolicitudResponseDTO;
 import co.edu.uniquindio.poo.exception.*;
@@ -9,6 +10,7 @@ import co.edu.uniquindio.poo.model.entity.HistorialSolicitud;
 import co.edu.uniquindio.poo.model.entity.Solicitud;
 import co.edu.uniquindio.poo.model.entity.Usuario;
 import co.edu.uniquindio.poo.model.enums.*;
+import co.edu.uniquindio.poo.repository.HistorialSolicitudRepository;
 import co.edu.uniquindio.poo.repository.SolicitudRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,6 +43,7 @@ import java.util.List;
 public class SolicitudService {
 
     private final SolicitudRepository solicitudRepository;
+    private final HistorialSolicitudRepository historialRepository;
     private final UsuarioService usuarioService;
     private final PriorizacionService priorizacionService;
     private final ActorContextService actorContextService;
@@ -310,6 +313,20 @@ public class SolicitudService {
     @Transactional(readOnly = true)
     public List<SolicitudResponseDTO> consultarPorResponsable(Long responsableId) {
         return mapper.toSolicitudDTOList(solicitudRepository.findByResponsableId(responsableId));
+    }
+
+    /**
+     * RF-06: Consulta el historial auditable de una solicitud específica.
+     * Retorna las acciones en orden cronológico sin cargar la solicitud completa.
+     */
+    @Transactional(readOnly = true)
+    public List<HistorialResponseDTO> obtenerHistorial(Long solicitudId) {
+        // Verificar que la solicitud existe
+        buscarSolicitudPorId(solicitudId);
+        return historialRepository.findBySolicitudIdOrderByFechaHoraAsc(solicitudId)
+                .stream()
+                .map(mapper::toHistorialDTO)
+                .collect(java.util.stream.Collectors.toList());
     }
 
         /**
