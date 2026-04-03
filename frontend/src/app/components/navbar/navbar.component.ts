@@ -31,13 +31,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   `,
   styles: [`
     .navbar {
-      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-      padding: 0 2rem;
+      background: #ffffff;
+      padding: 1rem 3rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      height: 60px;
+      border-bottom: 2px solid #e5e0d8;
+      font-family: inherit;
     }
     .brand-link {
       text-decoration: none;
@@ -45,38 +45,45 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       align-items: center;
       gap: 0.5rem;
     }
-    .brand-icon { font-size: 1.5rem; }
+    .brand-icon { font-size: 1.2rem; filter: grayscale(100%); }
     .brand-text {
-      color: #fff;
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      color: #3b3631;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #9c9186;
+      padding-bottom: 2px;
     }
     .navbar-menu {
       display: flex;
-      gap: 0.25rem;
+      gap: 1.5rem;
     }
     .nav-link {
-      color: rgba(255, 255, 255, 0.8);
+      color: #7a7066;
       text-decoration: none;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
+      padding: 0.3rem 0;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
       transition: all 0.2s;
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
+      text-transform: lowercase;
+      font-variant: small-caps;
+      border-bottom: 1px solid transparent;
     }
+    .nav-link span.nav-icon { filter: grayscale(100%) opacity(0.7); font-size: 0.9rem; }
     .nav-link:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.12);
+      color: #3b3631;
+      border-bottom: 1px solid #cfc5bb;
     }
     .nav-link.active {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.2);
+      color: #2b2520;
+      border-bottom: 1px solid #735c4b;
+      font-weight: 600;
     }
-    .nav-icon { font-size: 1rem; }
   `]
 })
 export class NavbarComponent {}

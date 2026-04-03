@@ -24,17 +24,17 @@ import java.util.List;
  * RF-12: Exposición de funcionalidades principales como API REST.
  * 
  * Endpoints:
- * POST   /api/solicitudes              → RF-01: Registrar solicitud
- * PUT    /api/solicitudes/{id}/clasificar → RF-02: Clasificar solicitud
- * PUT    /api/solicitudes/{id}/priorizar  → RF-03: Priorizar solicitud
- * PUT    /api/solicitudes/{id}/estado     → RF-04: Cambiar estado
- * PUT    /api/solicitudes/{id}/asignar    → RF-05: Asignar responsable
- * PUT    /api/solicitudes/{id}/cerrar     → RF-08: Cerrar solicitud
- * GET    /api/solicitudes/{id}            → Obtener solicitud + historial (RF-06)
- * GET    /api/solicitudes                 → RF-07: Consultar con filtros
- * GET    /api/solicitudes/estado/{estado} → RF-07: Consultar por estado
- * GET    /api/solicitudes/solicitante/{id}→ Consultar por solicitante
- * GET    /api/solicitudes/responsable/{id}→ Consultar por responsable
+ * POST /api/solicitudes → RF-01: Registrar solicitud
+ * PUT /api/solicitudes/{id}/clasificar → RF-02: Clasificar solicitud
+ * PUT /api/solicitudes/{id}/priorizar → RF-03: Priorizar solicitud
+ * PUT /api/solicitudes/{id}/estado → RF-04: Cambiar estado
+ * PUT /api/solicitudes/{id}/asignar → RF-05: Asignar responsable
+ * PUT /api/solicitudes/{id}/cerrar → RF-08: Cerrar solicitud
+ * GET /api/solicitudes/{id} → Obtener solicitud + historial (RF-06)
+ * GET /api/solicitudes → RF-07: Consultar con filtros
+ * GET /api/solicitudes/estado/{estado} → RF-07: Consultar por estado
+ * GET /api/solicitudes/solicitante/{id}→ Consultar por solicitante
+ * GET /api/solicitudes/responsable/{id}→ Consultar por responsable
  */
 @RestController
 @RequestMapping("/api/solicitudes")
@@ -201,8 +201,7 @@ public class SolicitudController {
             @RequestParam(name = "direction", defaultValue = "desc") String direction) {
 
         PageResponseDTO<SolicitudResponseDTO> response = solicitudService.consultarConFiltrosPaginado(
-                estado, tipo, prioridad, responsableId, page, size, sortBy, direction
-        );
+                estado, tipo, prioridad, responsableId, page, size, sortBy, direction);
 
         return ResponseEntity.ok(ApiResponseDTO.exitoso("Consulta paginada de solicitudes", response));
     }

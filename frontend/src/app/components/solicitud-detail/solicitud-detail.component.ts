@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SolicitudService } from '../../services/solicitud.service';
 import { UsuarioService } from '../../services/usuario.service';
+import { IaService, SugerenciaIAResponseDTO } from '../../services/ia.service';
 import {
   SolicitudResponse,
   UsuarioResponse,
@@ -19,14 +20,25 @@ import {
   CanalOrigen
 } from '../../models';
 
+@Pipe({ name: 'anyToTipo', standalone: true })
+export class AnyToTipoPipe implements PipeTransform {
+  transform(value: any): TipoSolicitud { return value as TipoSolicitud; }
+}
+
 @Component({
   selector: 'app-solicitud-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, AnyToTipoPipe],
   template: `
     <div class="page">
       @if (cargando) {
-        <div class="loading">Cargando solicitud...</div>
+        <div class="skeleton-container">
+          <div class="skeleton title-skeleton"></div>
+          <div class="detail-grid">
+            <div class="skeleton card-skeleton"></div>
+            <div class="skeleton card-skeleton"></div>
+          </div>
+        </div>
       } @else if (!solicitud) {
         <div class="empty">Solicitud no encontrada.</div>
       } @else {
@@ -126,7 +138,24 @@ import {
               <!-- RF-02: Clasificar -->
               @if (solicitud.estado === 'REGISTRADA') {
                 <div class="action-section">
-                  <h3>🏷️ Clasificar Solicitud (RF-02)</h3>
+                  <div class="action-section-header">
+                    <h3>🏷️ Clasificar Solicitud (RF-02)</h3>
+                    <button class="btn btn-ia" (click)="sugerirIA()" [disabled]="cargandoIA" title="Obtener sugerencia de Inteligencia Artificial (Opcional)">
+                      ✨ {{ cargandoIA ? 'Analizando...' : 'Asistente IA' }}
+                    </button>
+                  </div>
+                  
+                  @if (sugerenciaIA) {
+                    <div class="ia-suggestion slide-in">
+                      <div class="ia-badge">IA</div>
+                      <div class="ia-content">
+                        <strong>Clasificación sugerida:</strong> {{ tipoLabel(sugerenciaIA.tipoSugerido | anyToTipo) }}<br>
+                        <em>"{{ sugerenciaIA.razonamiento }}"</em>
+                      </div>
+                      <button class="btn-icon" (click)="aplicarSugerenciaIA()" title="Aplicar sugerencia">✅</button>
+                    </div>
+                  }
+
                   <div class="action-form">
                     <select [(ngModel)]="clasificarTipo" class="action-input">
                       @for (t of tipos; track t) {
@@ -239,194 +268,69 @@ import {
     </div>
   `,
   styles: [`
-    .page { padding: 1.5rem; }
-    .loading, .empty { text-align: center; padding: 3rem; color: #999; font-style: italic; }
-    .back-link {
-      color: #1a237e;
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-    .back-link:hover { text-decoration: underline; }
-    .page-title { font-size: 1.4rem; font-weight: 700; color: #1a237e; margin: 0.25rem 0 0; }
-    .detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.25rem;
-    }
-    .header-badges { display: flex; gap: 0.5rem; }
-    .badge {
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
-    .badge-lg { padding: 0.35rem 0.9rem; font-size: 0.85rem; }
-    .badge-registrada { background: #e3f2fd; color: #1565c0; }
-    .badge-clasificada { background: #f3e5f5; color: #7b1fa2; }
-    .badge-en_atencion { background: #fff3e0; color: #e65100; }
-    .badge-atendida { background: #e8f5e9; color: #2e7d32; }
-    .badge-cerrada { background: #eceff1; color: #455a64; }
-    .badge-p-baja { background: #e8f5e9; color: #2e7d32; }
-    .badge-p-media { background: #e3f2fd; color: #1565c0; }
-    .badge-p-alta { background: #fff3e0; color: #e65100; }
-    .badge-p-critica { background: #ffebee; color: #c62828; }
 
-    .alert {
-      padding: 0.85rem 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-    .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
-    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.page { padding: 3rem; background: #fff; color: #222; font-family: inherit; }
+.loading, .empty { text-align: center; padding: 4rem; color: #555; font-style: italic; border: 1px dashed #999; }
+.back-link { color: #000; text-decoration: none; font-size: 0.95rem; font-variant: small-caps; border-bottom: 1px dotted #000; padding-bottom: 2px; }
+.back-link:hover { border-bottom-style: solid; }
+.page-title { font-size: 2.2rem; font-weight: normal; color: #000; margin: 1.5rem 0; letter-spacing: 0.5px; border-bottom: 2px solid #000; padding-bottom: 0.75rem; font-variant: small-caps; }
+.detail-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; }
+.header-badges { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+.badge { padding: 0.25rem 0.75rem; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; border: 1px solid currentColor; background: transparent !important; color: #000; }
+.badge-lg { font-size: 0.9rem; padding: 0.4rem 1rem; }
+.badge-cerrada { text-decoration: line-through; color: #555; border-style: dashed; }
+.badge-p-baja, .badge-p-media { color: #555; border-style: dotted; }
+.badge-p-alta, .badge-p-critica { color: #000; font-weight: bold; border-width: 2px; }
+.alert { padding: 1rem 1.25rem; margin-bottom: 2rem; font-style: italic; border-left: 3px solid currentColor; background: #fbfbfb; }
+.alert-error { color: #555; border-color: #000; font-weight: bold; }
+.alert-success { color: #222; border-style: dashed; }
+.detail-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+.card { background: #fff; padding: 0; border: none; }
+.card h2 { font-size: 1.2rem; color: #000; margin-bottom: 1.5rem; font-weight: normal; font-variant: small-caps; letter-spacing: 1px; padding-bottom: 0.25rem; border-bottom: 1px dotted #000; }
+.info-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+.info-item { display: flex; flex-direction: column; gap: 0.4rem; }
+.info-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #555; }
+.info-value { font-size: 1.05rem; color: #111; line-height: 1.5; word-break: break-word; }
+.info-value.desc { background: transparent; padding: 0 0 0 1rem; border-left: 2px solid #000; font-style: italic; }
+.text-muted { color: #777; font-style: italic; }
+.action-section { padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #000; background: #fdfdfd; }
+.action-section.cerrar { border-style: dashed; background: #fff; }
+.action-section h3 { font-size: 1rem; color: #000; margin-bottom: 1.25rem; font-weight: normal; font-variant: small-caps; }
+.action-form { display: flex; flex-direction: column; gap: 1rem; }
+.action-input { padding: 0.5rem; border: none; border-bottom: 1px solid #000; font-family: inherit; font-size: 0.95rem; background: transparent; width: 100%; }
+.action-input:focus { border-bottom-width: 2px; outline: none; padding-bottom: 0.5rem; }
+.btn { padding: 0.6rem 1.5rem; border: 1px solid #000; background: #fff; color: #000; font-family: inherit; font-weight: normal; font-variant: small-caps; font-size: 1rem; cursor: pointer; transition: all 0.2s; align-self: flex-start; text-transform: lowercase; }
+.btn:hover:not(:disabled) { background: #000; color: #fff; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; border-style: dashed; }
+.btn-danger { color: #000; font-weight: bold; border-width: 2px; }
+.action-section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 1px dotted #000; padding-bottom: 0.5rem; }
+.btn-ia { background: transparent; color: #000; padding: 0.2rem 0.5rem; border: 1px dashed #000; font-size: 0.8rem; letter-spacing: 1px; }
+.btn-ia:hover:not(:disabled) { background: #000; color: #fff; }
+.ia-suggestion { background: #fbfbfb; border: 1px solid #000; border-left: 4px solid #000; padding: 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 1rem; font-size: 0.95rem; color: #222; }
+.ia-badge { font-family: monospace; letter-spacing: 2px; font-weight: bold; font-size: 0.8rem; margin-top: 2px; border: 1px solid #000; padding: 0.1rem 0.4rem; }
+.ia-content em { color: #555; font-style: italic; display: block; margin-top: 0.5rem; line-height: 1.4; border-top: 1px dotted #ccc; padding-top: 0.5rem; }
+.btn-icon { background: none; border: 1px solid #000; cursor: pointer; padding: 0.2rem 0.6rem; font-size: 1rem; border-radius: 0; }
+.btn-icon:hover { background: #000; color: #fff; }
+.historial-card { margin-top: 3rem; border-top: 2px solid #000; padding-top: 2rem; grid-column: 1 / -1; }
+.timeline { position: relative; padding-left: 1.5rem; margin-top: 1.5rem; }
+.timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: #000; }
+.timeline-item { position: relative; margin-bottom: 2.5rem; }
+.timeline-dot { position: absolute; left: -1.75rem; top: 6px; width: 11px; height: 11px; background: #fff; border: 2px solid #000; border-radius: 0; }
+.timeline-item:hover .timeline-dot { background: #000; }
+.timeline-content { padding: 0 0 0 1rem; background: transparent; border: none; }
+.timeline-header { display: flex; justify-content: flex-start; align-items: baseline; gap: 1rem; margin-bottom: 0.4rem; }
+.timeline-header strong { color: #000; font-weight: normal; font-size: 1rem; font-variant: small-caps; }
+.timeline-date { font-size: 0.85rem; color: #666; font-family: monospace; }
+.timeline-user { font-size: 0.9rem; color: #444; font-style: italic; display: block; margin-top: 0.2rem; }
+.timeline-obs { margin-top: 0.75rem; font-size: 0.95rem; color: #222; background: #fdfdfd; padding: 0.8rem 1rem; border-left: 1px dashed #000; }
+.skeleton-container { display: flex; flex-direction: column; gap: 2rem; }
+.skeleton { background: #eee; animation: pulse 1.5s infinite; border-radius: 0; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+.title-skeleton { height: 35px; width: 50%; }
+.card-skeleton { height: 200px; width: 100%; border: 1px solid #ddd; }
+@media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
 
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-    }
-    .full-width { grid-column: 1 / -1; }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .card h2 {
-      font-size: 1.05rem;
-      color: #1a237e;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-    .info-grid .full { grid-column: 1 / -1; }
-    .info-item { display: flex; flex-direction: column; gap: 0.15rem; }
-    .info-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #888;
-      font-weight: 600;
-    }
-    .info-value { font-size: 0.95rem; color: #333; }
-    .info-value.desc {
-      background: #f8f9fa;
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      line-height: 1.4;
-    }
-    .text-muted { color: #bbb; font-style: italic; }
-
-    .action-section {
-      padding: 0.75rem;
-      margin-bottom: 0.75rem;
-      border: 1px solid #e8eaf6;
-      border-radius: 8px;
-      background: #fafbff;
-    }
-    .action-section.cerrar { border-color: #ffcdd2; background: #fff8f8; }
-    .action-section h3 {
-      font-size: 0.9rem;
-      color: #333;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-    }
-    .action-form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-    }
-    .action-input {
-      padding: 0.45rem 0.65rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      min-width: 140px;
-      flex: 1;
-    }
-    .action-input:focus { border-color: #1a237e; outline: none; }
-    .btn {
-      padding: 0.45rem 1rem;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-action { background: #1a237e; color: #fff; }
-    .btn-action:hover { background: #283593; }
-    .btn-action:disabled { background: #9fa8da; cursor: not-allowed; }
-    .btn-danger { background: #c62828; color: #fff; }
-    .btn-danger:hover { background: #b71c1c; }
-    .btn-danger:disabled { background: #ef9a9a; cursor: not-allowed; }
-
-    /* Timeline */
-    .timeline { position: relative; padding-left: 1.5rem; }
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 7px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #e0e0e0;
-    }
-    .timeline-item {
-      position: relative;
-      margin-bottom: 1rem;
-    }
-    .timeline-dot {
-      position: absolute;
-      left: -1.5rem;
-      top: 4px;
-      width: 12px;
-      height: 12px;
-      background: #1a237e;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      box-shadow: 0 0 0 2px #c5cae9;
-    }
-    .timeline-content {
-      padding: 0.5rem 0.75rem;
-      background: #f8f9fa;
-      border-radius: 6px;
-      border: 1px solid #f0f0f0;
-    }
-    .timeline-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.2rem;
-      font-size: 0.9rem;
-    }
-    .timeline-date { font-size: 0.8rem; color: #999; }
-    .timeline-user { font-size: 0.8rem; color: #666; }
-    .timeline-obs {
-      margin-top: 0.25rem;
-      font-size: 0.85rem;
-      color: #555;
-      background: #fff;
-      padding: 0.35rem 0.5rem;
-      border-radius: 4px;
-    }
-
-    @media (max-width: 900px) {
-      .detail-grid { grid-template-columns: 1fr; }
-      .info-grid { grid-template-columns: 1fr; }
-    }
-  `]
+`]
 })
 export class SolicitudDetailComponent implements OnInit {
   solicitud: SolicitudResponse | null = null;
@@ -435,6 +339,9 @@ export class SolicitudDetailComponent implements OnInit {
   cargando = true;
   mensaje = '';
   esError = false;
+
+  cargandoIA = false;
+  sugerenciaIA: SugerenciaIAResponseDTO | null = null;
 
   // Form models
   clasificarTipo: TipoSolicitud = TipoSolicitud.REGISTRO_ASIGNATURAS;
@@ -455,7 +362,8 @@ export class SolicitudDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private solicitudService: SolicitudService,
-    private usuarioService: UsuarioService
+    private usuarioService: UsuarioService,
+    private iaService: IaService
   ) {}
 
   ngOnInit(): void {
@@ -497,6 +405,33 @@ export class SolicitudDetailComponent implements OnInit {
     const disponibles = this.estadosDisponibles;
     if (disponibles.length > 0) {
       this.nuevoEstado = disponibles[0];
+    }
+  }
+
+  sugerirIA(): void {
+    this.cargandoIA = true;
+    this.sugerenciaIA = null;
+    this.iaService.obtenerClasificacionSugerida(this.solicitudId).subscribe({
+      next: (res) => {
+        if (res.exito) {
+          this.sugerenciaIA = res.datos;
+        } else {
+          this.onError({ error: { mensaje: 'No se pudo obtener sugerencia IA, pero puede continuar manualmente.' }});
+        }
+        this.cargandoIA = false;
+      },
+      error: () => {
+        this.cargandoIA = false;
+        // Gracia (Fallback) RF-11
+        this.onError({ error: { mensaje: 'Servicio IA no disponible. La aplicación sigue operando normalmente.' }});
+      }
+    });
+  }
+
+  aplicarSugerenciaIA(): void {
+    if (this.sugerenciaIA) {
+      this.clasificarTipo = this.sugerenciaIA.tipoSugerido as TipoSolicitud;
+      this.clasificarObs = `Sugerencia IA Aplicada. Razón: ${this.sugerenciaIA.razonamiento}`;
     }
   }
 

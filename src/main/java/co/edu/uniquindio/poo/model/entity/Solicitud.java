@@ -117,9 +117,19 @@ public class Solicitud {
     }
 
     /**
+     * RF-08: Valida inmutabilidad de la solicitud
+     */
+    private void validarMutabilidad() {
+        if (this.estado == EstadoSolicitud.CERRADA) {
+            throw new co.edu.uniquindio.poo.exception.OperacionNoPermitidaException("La solicitud está CERRADA y es inmutable (RF-08).");
+        }
+    }
+
+    /**
      * RF-02 y RF-03: Clasifica la solicitud y asigna prioridad inicial.
      */
     public void clasificar(TipoSolicitud tipoSolicitud, Prioridad prioridad, String justificacionPrioridad) {
+        validarMutabilidad();
         this.tipoSolicitud = tipoSolicitud;
         this.prioridad = prioridad;
         this.justificacionPrioridad = justificacionPrioridad;
@@ -130,6 +140,7 @@ public class Solicitud {
      * RF-03: Ajusta manualmente la prioridad y su justificación.
      */
     public void asignarPrioridad(Prioridad prioridad, String justificacion) {
+        validarMutabilidad();
         this.prioridad = prioridad;
         this.justificacionPrioridad = justificacion;
     }
@@ -138,6 +149,7 @@ public class Solicitud {
      * RF-04: Actualiza el estado dentro del ciclo de vida.
      */
     public void transicionarEstado(EstadoSolicitud nuevoEstado) {
+        validarMutabilidad();
         this.estado = nuevoEstado;
     }
 
@@ -145,6 +157,7 @@ public class Solicitud {
      * RF-05: Asigna un responsable a la solicitud.
      */
     public void asignarResponsable(Usuario responsable) {
+        validarMutabilidad();
         this.responsable = responsable;
     }
 
@@ -152,6 +165,7 @@ public class Solicitud {
      * RF-08: Cierra formalmente la solicitud con observación.
      */
     public void cerrar(String observacionCierre) {
+        validarMutabilidad();
         this.estado = EstadoSolicitud.CERRADA;
         this.observacionCierre = observacionCierre;
     }

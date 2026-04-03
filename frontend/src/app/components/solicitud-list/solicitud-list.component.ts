@@ -123,141 +123,39 @@ import {
     </div>
   `,
   styles: [`
-    .page { padding: 1.5rem; }
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
-    }
-    .page-title { font-size: 1.5rem; font-weight: 700; color: #1a237e; }
-    .btn {
-      padding: 0.55rem 1.25rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .btn-primary { background: #1a237e; color: #fff; }
-    .btn-primary:hover { background: #283593; }
-    .btn-outline {
-      background: transparent;
-      border: 2px solid #c5cae9;
-      color: #1a237e;
-      padding: 0.45rem 1rem;
-    }
-    .btn-outline:hover { border-color: #1a237e; background: #e8eaf6; }
 
-    .filters-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 1rem 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      margin-bottom: 1rem;
-    }
-    .filters-row {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-end;
-      flex-wrap: wrap;
-    }
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-    .filter-group label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .filter-group select {
-      padding: 0.45rem 0.75rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      background: #fff;
-      min-width: 170px;
-    }
-    .filter-group select:focus { border-color: #1a237e; outline: none; }
-
-    .table-card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      overflow: hidden;
-    }
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th {
-      text-align: left;
-      padding: 0.75rem 1rem;
-      background: #f5f5f5;
-      color: #555;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 700;
-    }
-    .data-table td {
-      padding: 0.7rem 1rem;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 0.9rem;
-    }
-    .data-table tbody tr:hover { background: #f8f9ff; }
-    .id-cell { font-weight: 700; color: #1a237e; }
-    .title-cell { font-weight: 500; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    .badge {
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
-    }
-    .badge-tipo { background: #f1f3f4; color: #555; }
-    .badge-registrada { background: #e3f2fd; color: #1565c0; }
-    .badge-clasificada { background: #f3e5f5; color: #7b1fa2; }
-    .badge-en_atencion { background: #fff3e0; color: #e65100; }
-    .badge-atendida { background: #e8f5e9; color: #2e7d32; }
-    .badge-cerrada { background: #eceff1; color: #455a64; }
-    .badge-p-baja { background: #e8f5e9; color: #2e7d32; }
-    .badge-p-media { background: #e3f2fd; color: #1565c0; }
-    .badge-p-alta { background: #fff3e0; color: #e65100; }
-    .badge-p-critica { background: #ffebee; color: #c62828; }
-
-    .btn-sm {
-      padding: 0.3rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-view { background: #e3f2fd; color: #1565c0; }
-    .btn-view:hover { background: #bbdefb; }
-
-    .table-footer {
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      color: #888;
-      border-top: 1px solid #f0f0f0;
-    }
-    .loading, .empty {
-      text-align: center; padding: 3rem; color: #999; font-style: italic;
-    }
-    .text-muted { color: #ccc; }
-
+    .page { padding: 3rem; background: #fff; color: #222; font-family: inherit; }
+    .page-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2.5rem; border-bottom: 2px solid #000; padding-bottom: 0.75rem; }
+    .page-title { font-size: 2.2rem; font-weight: normal; color: #000; font-variant: small-caps; letter-spacing: 0.5px; margin: 0; }
+    .btn { padding: 0.6rem 1.5rem; border: 1px solid #000; background: #fff; color: #000; font-family: inherit; font-variant: small-caps; font-size: 1rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn:hover { background: #000; color: #fff; }
+    .filters { background: #fbfbfb; border: 1px dashed #000; padding: 1.5rem; margin-bottom: 2.5rem; display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-end; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 200px; }
+    .filter-group label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #555; }
+    .filter-group select { padding: 0.5rem; border: none; border-bottom: 1px solid #000; font-family: inherit; font-size: 0.95rem; background: transparent; width: 100%; border-radius: 0; }
+    .filter-group select:focus { border-bottom-width: 2px; outline: none; padding-bottom: 0.5rem; }
+    .table-card { margin-top: 1rem; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .data-table th { padding: 1rem; border-bottom: 2px solid #000; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; color: #000; font-weight: normal; font-variant: small-caps; }
+    .data-table td { padding: 1rem; border-bottom: 1px dotted #000; font-size: 0.95rem; color: #222; vertical-align: middle; }
+    .data-table tr:hover td { background: #fbfbfb; }
+    .badge { padding: 0.25rem 0.75rem; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; border: 1px solid currentColor; background: transparent !important; color: #000; white-space: nowrap; }
+    .badge-tipo { border-style: dotted; color: #555; }
+    .badge-cerrada { text-decoration: line-through; color: #555; border-style: dashed; }
+    .badge-p-baja, .badge-p-media { color: #555; border-style: dotted; }
+    .badge-p-alta, .badge-p-critica { color: #000; font-weight: bold; border-width: 2px; }
+    .btn-sm { padding: 0.25rem 0.75rem; border: 1px solid #000; background: transparent; color: #000; font-variant: small-caps; font-size: 0.85rem; text-decoration: none; cursor: pointer; transition: all 0.2s; display: inline-block; }
+    .btn-sm:hover { background: #000; color: #fff; }
+    .table-footer { padding: 1rem 0; font-size: 0.9rem; color: #555; font-style: italic; border-top: 2px solid #000; margin-top: 2rem; display: flex; justify-content: space-between; }
+    .loading, .empty { text-align: center; padding: 4rem; color: #555; font-style: italic; border: 1px dashed #999; margin-top: 2rem; }
+    .text-muted { color: #777; font-style: italic; }
     @media (max-width: 900px) {
-      .data-table { font-size: 0.8rem; }
-      .data-table th, .data-table td { padding: 0.5rem; }
+      .filters { flex-direction: column; gap: 1rem; }
+      .data-table { font-size: 0.85rem; }
+      .data-table th, .data-table td { padding: 0.75rem 0.5rem; }
+      .page { padding: 1.5rem; }
     }
+
   `]
 })
 export class SolicitudListComponent implements OnInit {

@@ -86,83 +86,86 @@ import {
     </div>
   `,
   styles: [`
-    .page { padding: 1.5rem; max-width: 800px; margin: 0 auto; }
-    .page-title { font-size: 1.5rem; font-weight: 700; color: #1a237e; margin-bottom: 1.25rem; }
+    .page { padding: 2rem 3rem; max-width: 800px; margin: 0 auto; min-height: calc(100vh - 60px); }
+    .page-title { 
+      font-size: 1.8rem; font-weight: 400; color: #000; 
+      font-variant: small-caps; letter-spacing: 1px; 
+      margin-bottom: 2rem; border-bottom: 1px solid #000; padding-bottom: 0.5rem;
+    }
     .form-card {
       background: #fff;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      padding: 0rem;
     }
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
+      gap: 2rem 1.5rem;
     }
     .full-width { grid-column: 1 / -1; }
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.5rem;
     }
     .form-group label {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: #444;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     .form-group input,
     .form-group select,
     .form-group textarea {
-      padding: 0.6rem 0.85rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      padding: 0.5rem;
+      border: none;
+      border-bottom: 1px solid #000;
+      border-radius: 0;
+      font-size: 1rem;
       font-family: inherit;
-      transition: border-color 0.2s;
+      background: transparent;
+      transition: all 0.2s;
     }
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
-      border-color: #1a237e;
       outline: none;
+      border-bottom: 2px solid #5c4d42;
     }
     .form-group textarea { resize: vertical; }
-    .field-error { color: #c62828; font-size: 0.8rem; }
+    .field-error { color: #8a2be2; font-size: 0.8rem; font-style: italic; }
     .form-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
+      gap: 1rem;
+      margin-top: 3rem;
       padding-top: 1.5rem;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid #000;
     }
     .btn {
-      padding: 0.6rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid #000;
+      background: #fff;
+      color: #000;
+      font-family: inherit;
+      font-weight: 400;
       font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-primary { background: #1a237e; color: #fff; }
-    .btn-primary:hover { background: #283593; }
-    .btn-primary:disabled { background: #9fa8da; cursor: not-allowed; }
-    .btn-outline {
-      background: transparent;
-      border: 2px solid #c5cae9;
-      color: #1a237e;
-    }
-    .btn-outline:hover { border-color: #1a237e; background: #e8eaf6; }
+    .btn-primary:hover:not(:disabled) { background: #000; color: #fff; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; border-color: #999; color: #999; }
+    .btn-outline { border: 1px dashed #666; color: #444; }
+    .btn-outline:hover { border-style: solid; border-color: #000; color: #000; }
+    
     .alert {
-      padding: 0.85rem 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      font-weight: 500;
+      padding: 1rem; margin-bottom: 2rem; font-size: 0.95rem; font-style: italic;
+      border: 1px solid currentColor;
     }
-    .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
-    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .alert-error { color: #8a2be2; }
+    .alert-success { color: #2e7d32; }
   `]
 })
 export class SolicitudCreateComponent implements OnInit {
