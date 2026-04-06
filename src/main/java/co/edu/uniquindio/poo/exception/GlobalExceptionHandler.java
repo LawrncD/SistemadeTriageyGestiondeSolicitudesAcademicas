@@ -1,12 +1,8 @@
 package co.edu.uniquindio.poo.exception;
 
-<<<<<<< HEAD
 import co.edu.uniquindio.poo.dto.common.ApiResponseDTO;
-=======
-import co.edu.uniquindio.poo.dto.response.ApiResponseDTO;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
->>>>>>> 995e05d2875e714c64d080f69106b07c86ca528c
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

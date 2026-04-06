@@ -3,6 +3,7 @@ package co.edu.uniquindio.poo.service;
 import co.edu.uniquindio.poo.model.entity.Usuario;
 import co.edu.uniquindio.poo.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import java.util.Collections;
  * Servicio robusto para integrar la base de datos de usuarios con Spring Security.
  */
 @Service
+@Primary
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 

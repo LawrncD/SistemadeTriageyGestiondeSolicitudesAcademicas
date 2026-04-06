@@ -48,18 +48,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Rutas públicas
                         .requestMatchers("/h2-console/**").permitAll()
-<<<<<<< HEAD
-                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/api/auth/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/solicitudes").hasAnyRole("ESTUDIANTE", "ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.GET, "/api/solicitudes/**").hasAnyRole("ESTUDIANTE", "DOCENTE", "ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.PUT, "/api/solicitudes/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRATIVO")
-                    .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRATIVO")
-                    .requestMatchers(HttpMethod.GET, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
-                    .requestMatchers(HttpMethod.POST, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
-                    .anyRequest().authenticated()
-=======
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
 
@@ -80,7 +68,6 @@ public class SecurityConfig {
 
                         // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()
->>>>>>> 995e05d2875e714c64d080f69106b07c86ca528c
                 )
                 // Configuración stateless para JWT (sin sesiones)
                 .sessionManagement(session -> session

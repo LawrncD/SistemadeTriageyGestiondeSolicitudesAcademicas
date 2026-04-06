@@ -1,6 +1,5 @@
 package co.edu.uniquindio.poo.controller;
 
-<<<<<<< HEAD
 import co.edu.uniquindio.poo.dto.common.ApiResponseDTO;
 import co.edu.uniquindio.poo.dto.usuario.UsuarioRequestDTO;
 import co.edu.uniquindio.poo.dto.usuario.UsuarioResponseDTO;
@@ -16,28 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Base64;
 import java.util.Map;
 
-=======
-import co.edu.uniquindio.poo.dto.request.LoginRequestDTO;
-import co.edu.uniquindio.poo.dto.response.ApiResponseDTO;
-import co.edu.uniquindio.poo.dto.response.LoginResponseDTO;
-import co.edu.uniquindio.poo.service.AuthService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-/**
- * Controlador REST para autenticación.
- * Gestiona el login y la generación de tokens JWT.
- */
->>>>>>> 995e05d2875e714c64d080f69106b07c86ca528c
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
-<<<<<<< HEAD
 public class AuthController {
 
     private final UsuarioService usuarioService;
@@ -82,31 +63,5 @@ public class AuthController {
     public ResponseEntity<ApiResponseDTO<UsuarioResponseDTO>> registro(@Valid @RequestBody UsuarioRequestDTO request) {
         UsuarioResponseDTO response = usuarioService.registrarUsuario(request);
         return ResponseEntity.status(201).body(ApiResponseDTO.exitoso("Usuario registrado con Ã©xito", response));
-=======
-@Tag(name = "Autenticación", description = "API para autenticación y gestión de tokens JWT")
-public class AuthController {
-
-    private final AuthService authService;
-
-    /**
-     * Endpoint de login que retorna un token JWT.
-     */
-    @Operation(summary = "Iniciar sesión", description = "Autentica al usuario y retorna un token JWT")
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> login(
-            @Valid @RequestBody LoginRequestDTO request) {
-        LoginResponseDTO response = authService.login(request);
-        return ResponseEntity.ok(ApiResponseDTO.exitoso("Autenticación exitosa", response));
-    }
-
-    /**
-     * Endpoint para verificar si el token es válido.
-     * Solo retorna éxito si el token en el header es válido.
-     */
-    @Operation(summary = "Verificar token", description = "Verifica si el token JWT actual es válido")
-    @GetMapping("/verificar")
-    public ResponseEntity<ApiResponseDTO<String>> verificarToken() {
-        return ResponseEntity.ok(ApiResponseDTO.exitoso("Token válido", "Autenticado correctamente"));
->>>>>>> 995e05d2875e714c64d080f69106b07c86ca528c
     }
 }
