@@ -63,20 +63,31 @@ export class AuthComponent {
       this.authService.login(val.email, val.password).subscribe({
         next: (res) => {
           this.loading = false;
-          this.router.navigate(['/dashboard']);
+          // Verificar que el login fue exitoso antes de navegar
+          if (res.exitoso) {
+            console.log('Login exitoso, token guardado');
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.errorMsg = res.mensaje || 'Error al iniciar sesión';
+          }
         },
         error: (err) => {
           this.loading = false;
-          this.errorMsg = err.error?.mensaje || 'Error al iniciar sesiÃ³n';
+          console.error('Error en login:', err);
+          this.errorMsg = err.error?.mensaje || 'Error al iniciar sesión';
         }
       });
     } else {
       this.authService.register(val).subscribe({
         next: (res) => {
           this.loading = false;
-          this.isLogin = true;
-          this.errorMsg = '';
-          alert('Â¡Cuenta creada exitosamente! Ahora inicia sesiÃ³n.');
+          if (res.exitoso) {
+            this.isLogin = true;
+            this.errorMsg = '';
+            alert('¡Cuenta creada exitosamente! Ahora inicia sesión.');
+          } else {
+            this.errorMsg = res.mensaje || 'Error al crear la cuenta';
+          }
         },
         error: (err) => {
           this.loading = false;

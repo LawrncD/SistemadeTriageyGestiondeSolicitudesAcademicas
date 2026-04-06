@@ -17,220 +17,535 @@ import {
   imports: [CommonModule, RouterLink],
   template: `
     <div class="dashboard">
-      <h1 class="page-title">Dashboard</h1>
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Resumen del sistema de solicitudes académicas</p>
+        </div>
+        <a routerLink="/solicitudes/nueva" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          Nueva Solicitud
+        </a>
+      </header>
 
       <!-- Stats Cards -->
       <div class="stats-grid">
-        <div class="stat-card registrada">
-          <div class="stat-number">{{ contarPorEstado('REGISTRADA') }}</div>
-          <div class="stat-label">Registradas</div>
-          <div class="stat-icon">📥</div>
+        <div class="stat-card" (click)="null">
+          <div class="stat-icon registrada">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ contarPorEstado('REGISTRADA') }}</div>
+            <div class="stat-label">Registradas</div>
+          </div>
         </div>
-        <div class="stat-card clasificada">
-          <div class="stat-number">{{ contarPorEstado('CLASIFICADA') }}</div>
-          <div class="stat-label">Clasificadas</div>
-          <div class="stat-icon">🏷️</div>
+
+        <div class="stat-card">
+          <div class="stat-icon clasificada">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ contarPorEstado('CLASIFICADA') }}</div>
+            <div class="stat-label">Clasificadas</div>
+          </div>
         </div>
-        <div class="stat-card en-atencion">
-          <div class="stat-number">{{ contarPorEstado('EN_ATENCION') }}</div>
-          <div class="stat-label">En Atención</div>
-          <div class="stat-icon">⚙️</div>
+
+        <div class="stat-card">
+          <div class="stat-icon en-atencion">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ contarPorEstado('EN_ATENCION') }}</div>
+            <div class="stat-label">En Atención</div>
+          </div>
         </div>
-        <div class="stat-card atendida">
-          <div class="stat-number">{{ contarPorEstado('ATENDIDA') }}</div>
-          <div class="stat-label">Atendidas</div>
-          <div class="stat-icon">✅</div>
+
+        <div class="stat-card">
+          <div class="stat-icon atendida">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ contarPorEstado('ATENDIDA') }}</div>
+            <div class="stat-label">Atendidas</div>
+          </div>
         </div>
-        <div class="stat-card cerrada">
-          <div class="stat-number">{{ contarPorEstado('CERRADA') }}</div>
-          <div class="stat-label">Cerradas</div>
-          <div class="stat-icon">🔒</div>
+
+        <div class="stat-card">
+          <div class="stat-icon cerrada">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ contarPorEstado('CERRADA') }}</div>
+            <div class="stat-label">Cerradas</div>
+          </div>
         </div>
       </div>
 
-      <!-- Priority Summary -->
-      <div class="section-row">
-        <div class="card priority-card">
-          <h2>Distribución por Prioridad</h2>
-          <div class="priority-bars">
-            @for (p of prioridades; track p) {
-              <div class="priority-row">
-                <span class="priority-label badge" [class]="'badge-' + p.toLowerCase()">{{ prioridadLabel(p) }}</span>
-                <div class="bar-wrapper">
-                  <div class="bar" [class]="'bar-' + p.toLowerCase()"
-                    [style.width.%]="getBarWidth(p)">
+      <!-- Main Content Grid -->
+      <div class="content-grid">
+        <!-- Priority Distribution -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Distribución por Prioridad</h2>
+          </div>
+          <div class="card-body">
+            <div class="priority-list">
+              @for (p of prioridades; track p) {
+                <div class="priority-item">
+                  <div class="priority-info">
+                    <span class="priority-dot" [class]="'dot-' + p.toLowerCase()"></span>
+                    <span class="priority-name">{{ prioridadLabel(p) }}</span>
                   </div>
+                  <div class="priority-bar-container">
+                    <div class="priority-bar" [class]="'bar-' + p.toLowerCase()"
+                      [style.width.%]="getBarWidth(p)">
+                    </div>
+                  </div>
+                  <span class="priority-count">{{ contarPorPrioridad(p) }}</span>
                 </div>
-                <span class="priority-count">{{ contarPorPrioridad(p) }}</span>
+              }
+            </div>
+            
+            @if (solicitudes.length === 0) {
+              <div class="empty-state">
+                <p>No hay datos disponibles</p>
               </div>
             }
           </div>
         </div>
 
-        <div class="card recent-card">
-          <h2>Solicitudes Recientes</h2>
-          @if (solicitudes.length === 0) {
-            <p class="empty-msg">No hay solicitudes registradas.</p>
-          }
-          @for (s of ultimasSolicitudes; track s.id) {
-            <a [routerLink]="['/solicitudes', s.id]" class="recent-item">
-              <div class="recent-header">
-                <span class="recent-title">{{ s.titulo }}</span>
-                <span class="badge" [class]="'badge-' + s.estado.toLowerCase()">
-                  {{ estadoLabel(s.estado) }}
-                </span>
+        <!-- Recent Requests -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Solicitudes Recientes</h2>
+            <a routerLink="/solicitudes" class="view-all">Ver todas →</a>
+          </div>
+          <div class="card-body">
+            @if (solicitudes.length === 0) {
+              <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                  <rect x="9" y="3" width="6" height="4" rx="1"/>
+                </svg>
+                <p>No hay solicitudes registradas</p>
+                <a routerLink="/solicitudes/nueva" class="btn-link">Crear primera solicitud</a>
               </div>
-              <div class="recent-meta">
-                <span>{{ tipoLabel(s.tipo) }}</span>
-                <span>{{ s.solicitante.nombre }} {{ s.solicitante.apellido }}</span>
-                <span>{{ s.fechaCreacion | date:'short' }}</span>
+            } @else {
+              <div class="recent-list">
+                @for (s of ultimasSolicitudes; track s.id) {
+                  <a [routerLink]="['/solicitudes', s.id]" class="recent-item">
+                    <div class="recent-main">
+                      <span class="recent-id">#{{ s.id }}</span>
+                      <span class="recent-title">{{ s.titulo }}</span>
+                    </div>
+                    <div class="recent-details">
+                      <span class="badge" [class]="'badge-' + s.estado.toLowerCase()">
+                        {{ estadoLabel(s.estado) }}
+                      </span>
+                      <span class="recent-date">{{ s.fechaCreacion | date:'dd/MM/yy' }}</span>
+                    </div>
+                  </a>
+                }
               </div>
-            </a>
-          }
+            }
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .dashboard { padding: 1.5rem; }
-    .page-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #1a237e;
-      margin-bottom: 1.5rem;
+    .dashboard {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      animation: fadeIn 0.4s ease-out;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text, #3d3d3d);
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-secondary, #6b6b6b);
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--color-primary, #8b7355);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md, 10px);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-hover, #6d5a44);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(139, 115, 85, 0.25);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Stats Grid */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
+
     .stat-card {
-      background: #fff;
-      border-radius: 12px;
+      background: var(--color-card, #ffffff);
+      border-radius: var(--radius-md, 10px);
       padding: 1.25rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      position: relative;
-      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: 1px solid var(--color-border, #e0dcd5);
+      transition: all 0.2s ease;
     }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
+
+    .stat-card:hover {
+      border-color: var(--color-primary-light, #d4c8b8);
+      box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.06));
     }
-    .stat-card.registrada::before { background: #42a5f5; }
-    .stat-card.clasificada::before { background: #ab47bc; }
-    .stat-card.en-atencion::before { background: #ffa726; }
-    .stat-card.atendida::before { background: #66bb6a; }
-    .stat-card.cerrada::before { background: #78909c; }
-    .stat-number { font-size: 2rem; font-weight: 800; color: #1a237e; }
-    .stat-label { font-size: 0.85rem; color: #666; margin-top: 0.25rem; }
+
     .stat-icon {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 1.5rem;
-      opacity: 0.5;
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm, 6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    .section-row {
+
+    .stat-icon.registrada { background: #e8f4fd; color: #3b82b6; }
+    .stat-icon.clasificada { background: #f3e8fd; color: #8b5cf6; }
+    .stat-icon.en-atencion { background: #fef3e2; color: #d97706; }
+    .stat-icon.atendida { background: #e8f5e9; color: #22863a; }
+    .stat-icon.cerrada { background: var(--color-bg-alt, #edeae5); color: var(--color-text-secondary, #6b6b6b); }
+
+    .stat-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stat-number {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text, #3d3d3d);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary, #6b6b6b);
+      margin-top: 0.15rem;
+    }
+
+    /* Content Grid */
+    .content-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
     }
+
     .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      background: var(--color-card, #ffffff);
+      border-radius: var(--radius-lg, 16px);
+      border: 1px solid var(--color-border, #e0dcd5);
+      overflow: hidden;
     }
-    .card h2 {
-      font-size: 1.1rem;
-      color: #1a237e;
-      margin-bottom: 1rem;
+
+    .card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--color-border, #e0dcd5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h2 {
+      font-size: 1rem;
       font-weight: 600;
+      color: var(--color-text, #3d3d3d);
     }
-    .priority-row {
+
+    .view-all {
+      font-size: 0.85rem;
+      color: var(--color-primary, #8b7355);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .view-all:hover {
+      color: var(--color-primary-hover, #6d5a44);
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Priority List */
+    .priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .priority-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .priority-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 80px;
+    }
+
+    .priority-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-baja { background: var(--color-success, #5d8a66); }
+    .dot-media { background: var(--color-info, #5a7d9a); }
+    .dot-alta { background: var(--color-warning, #c9a227); }
+    .dot-critica { background: var(--color-danger, #b85450); }
+
+    .priority-name {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary, #6b6b6b);
+      text-transform: capitalize;
+    }
+
+    .priority-bar-container {
+      flex: 1;
+      height: 8px;
+      background: var(--color-bg-alt, #edeae5);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .priority-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease-out;
+      min-width: 4px;
+    }
+
+    .bar-baja { background: var(--color-success, #5d8a66); }
+    .bar-media { background: var(--color-info, #5a7d9a); }
+    .bar-alta { background: var(--color-warning, #c9a227); }
+    .bar-critica { background: var(--color-danger, #b85450); }
+
+    .priority-count {
+      font-weight: 600;
+      color: var(--color-text, #3d3d3d);
+      min-width: 28px;
+      text-align: right;
+      font-size: 0.9rem;
+    }
+
+    /* Recent List */
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .recent-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-sm, 6px);
+      text-decoration: none;
+      color: inherit;
+      background: var(--color-bg, #f7f5f2);
+      transition: all 0.2s ease;
+    }
+
+    .recent-item:hover {
+      background: var(--color-bg-alt, #edeae5);
+      transform: translateX(4px);
+    }
+
+    .recent-main {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-    .priority-label { width: 70px; text-align: center; font-size: 0.8rem; }
-    .bar-wrapper {
+      min-width: 0;
       flex: 1;
-      background: #f1f3f4;
-      border-radius: 6px;
-      height: 22px;
-      overflow: hidden;
     }
-    .bar {
-      height: 100%;
-      border-radius: 6px;
-      transition: width 0.6s ease;
-      min-width: 2px;
-    }
-    .bar-baja { background: #66bb6a; }
-    .bar-media { background: #42a5f5; }
-    .bar-alta { background: #ffa726; }
-    .bar-critica { background: #ef5350; }
-    .priority-count { font-weight: 600; color: #333; min-width: 24px; text-align: right; }
 
+    .recent-id {
+      font-size: 0.8rem;
+      color: var(--color-text-muted, #9a9a9a);
+      font-weight: 500;
+    }
+
+    .recent-title {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--color-text, #3d3d3d);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-details {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .recent-date {
+      font-size: 0.8rem;
+      color: var(--color-text-muted, #9a9a9a);
+    }
+
+    /* Badges */
     .badge {
-      padding: 0.2rem 0.6rem;
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
       border-radius: 20px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
-    .badge-registrada { background: #e3f2fd; color: #1565c0; }
-    .badge-clasificada { background: #f3e5f5; color: #7b1fa2; }
-    .badge-en_atencion { background: #fff3e0; color: #e65100; }
-    .badge-atendida { background: #e8f5e9; color: #2e7d32; }
-    .badge-cerrada { background: #eceff1; color: #455a64; }
-    .badge-baja { background: #e8f5e9; color: #2e7d32; }
-    .badge-media { background: #e3f2fd; color: #1565c0; }
-    .badge-alta { background: #fff3e0; color: #e65100; }
-    .badge-critica { background: #ffebee; color: #c62828; }
 
-    .recent-item {
-      display: block;
-      padding: 0.75rem;
-      border-radius: 8px;
+    .badge-registrada { background: #e8f4fd; color: #3b82b6; }
+    .badge-clasificada { background: #f3e8fd; color: #8b5cf6; }
+    .badge-en_atencion { background: #fef3e2; color: #d97706; }
+    .badge-atendida { background: #e8f5e9; color: #22863a; }
+    .badge-cerrada { background: var(--color-bg-alt, #edeae5); color: var(--color-text-secondary, #6b6b6b); }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--color-text-muted, #9a9a9a);
+    }
+
+    .empty-state svg {
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-link {
+      color: var(--color-primary, #8b7355);
       text-decoration: none;
-      color: inherit;
-      border: 1px solid #f1f3f4;
-      margin-bottom: 0.5rem;
-      transition: all 0.2s;
+      font-weight: 500;
+      font-size: 0.9rem;
     }
-    .recent-item:hover {
-      border-color: #c5cae9;
-      background: #f8f9ff;
-    }
-    .recent-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.35rem;
-    }
-    .recent-title { font-weight: 600; font-size: 0.9rem; }
-    .recent-meta {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.8rem;
-      color: #888;
-    }
-    .empty-msg { color: #999; font-style: italic; text-align: center; padding: 2rem; }
 
-    @media (max-width: 1024px) {
-      .stats-grid { grid-template-columns: repeat(3, 1fr); }
-      .section-row { grid-template-columns: 1fr; }
+    .btn-link:hover {
+      text-decoration: underline;
     }
-    @media (max-width: 600px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stat-card {
+        padding: 1rem;
+      }
+
+      .stat-icon {
+        width: 40px;
+        height: 40px;
+      }
+
+      .stat-number {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `]
 })
@@ -242,7 +557,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.solicitudService.listarTodas().subscribe({
-      next: res => { if (res.exito) this.solicitudes = res.datos; },
+      next: res => { if (res.exitoso) this.solicitudes = res.datos; },
       error: () => {}
     });
   }

@@ -98,6 +98,16 @@ public class UsuarioService {
     }
 
     /**
+     * Obtiene todos los usuarios activos (para seleccionar solicitante).
+     */
+    @Transactional(readOnly = true)
+    public List<UsuarioResponseDTO> obtenerUsuariosActivos() {
+        return usuarioRepository.findByActivoTrue().stream()
+                .map(mapper::toUsuarioDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Desactiva un usuario del sistema.
      */
     public UsuarioResponseDTO desactivarUsuario(Long id) {

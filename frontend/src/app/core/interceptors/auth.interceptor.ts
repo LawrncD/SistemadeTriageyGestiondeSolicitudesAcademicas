@@ -8,23 +8,30 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  // Si hay token, clonamos la petición y le añadimos el header de Authorization
+  // Si hay token, clonamos la petición y le añadimos el header de Authorization con Bearer
   let authReq = req;
   if (token) {
+    console.log('Interceptor: Añadiendo token Bearer a la petición:', req.url);
     authReq = req.clone({
       setHeaders: {
-        Authorization: `Basic ${token}`
+        Authorization: `Bearer ${token}`
       }
     });
+  } else {
+    console.log('Interceptor: No hay token disponible para:', req.url);
   }
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // No hacer logout si el error es del endpoint de login/registro
+      const isAuthEndpoint = req.url.includes('/api/auth/');
+      
+      console.log('Interceptor: Error HTTP', error.status, 'en', req.url);
+      
       // Manejo global de errores HTTP (ej: Token expirado o 401)
-      if (error.status === 401 || error.status === 403) {
-        console.error('El token ha expirado o no está autorizado. Cerrando sesión...');
+      if ((error.status === 401 || error.status === 403) && !isAuthEndpoint) {
+        console.error('Interceptor: Token inválido o expirado. Cerrando sesión...');
         authService.logout();
-        // Redirigirías al router acá (ej. inject(Router).navigate(['/login']))
       }
       return throwError(() => error);
     })

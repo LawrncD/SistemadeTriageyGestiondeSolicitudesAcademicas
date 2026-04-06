@@ -15,268 +15,580 @@ import {
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page">
-      <div class="page-header">
-        <h1 class="page-title">Usuarios</h1>
-        <button class="btn btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
-          {{ mostrarFormulario ? '✕ Cerrar' : '➕ Nuevo Usuario' }}
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Usuarios</h1>
+          <p class="page-subtitle">Gestión de usuarios del sistema</p>
+        </div>
+        <button class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
+          @if (mostrarFormulario) {
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Cerrar
+          } @else {
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nuevo Usuario
+          }
         </button>
-      </div>
+      </header>
 
       @if (mensaje) {
         <div class="alert" [class.alert-success]="!esError" [class.alert-error]="esError">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            @if (esError) {
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            } @else {
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <polyline points="22,4 12,14.01 9,11.01"/>
+            }
+          </svg>
           {{ mensaje }}
         </div>
       }
 
-      <!-- Create Form -->
+      <!-- Create/Edit Form -->
       @if (mostrarFormulario) {
-        <div class="form-card">
-          <h2>{{ editandoId ? 'Editar' : 'Nuevo' }} Usuario</h2>
+        <div class="form-card fade-in">
+          <h2 class="form-title">{{ editandoId ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
           <form (ngSubmit)="guardar()" #form="ngForm">
             <div class="form-grid">
               <div class="form-group">
-                <label>Identificación *</label>
-                <input type="text" [(ngModel)]="formUsuario.identificacion" name="identificacion"
+                <label for="identificacion">Identificación</label>
+                <input type="text" id="identificacion" [(ngModel)]="formUsuario.identificacion" name="identificacion"
                   required placeholder="Ej: 1234567890">
               </div>
               <div class="form-group">
-                <label>Nombre *</label>
-                <input type="text" [(ngModel)]="formUsuario.nombre" name="nombre"
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" [(ngModel)]="formUsuario.nombre" name="nombre"
                   required placeholder="Nombre">
               </div>
               <div class="form-group">
-                <label>Apellido *</label>
-                <input type="text" [(ngModel)]="formUsuario.apellido" name="apellido"
+                <label for="apellido">Apellido</label>
+                <input type="text" id="apellido" [(ngModel)]="formUsuario.apellido" name="apellido"
                   required placeholder="Apellido">
               </div>
               <div class="form-group">
-                <label>Email *</label>
-                <input type="email" [(ngModel)]="formUsuario.email" name="email"
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" [(ngModel)]="formUsuario.email" name="email"
                   required placeholder="correo@ejemplo.com">
               </div>
               <div class="form-group">
-                <label>Rol *</label>
-                <select [(ngModel)]="formUsuario.rol" name="rol" required>
+                <label for="rol">Rol</label>
+                <select id="rol" [(ngModel)]="formUsuario.rol" name="rol" required>
                   @for (r of roles; track r) {
                     <option [value]="r">{{ rolLabel(r) }}</option>
                   }
                 </select>
               </div>
               <div class="form-group">
-                <label>Contraseña *</label>
-                <input type="password" [(ngModel)]="formUsuario.password" name="password"
-                  required minlength="4" placeholder="Contraseña">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" [(ngModel)]="formUsuario.password" name="password"
+                  [required]="!editandoId" minlength="4" placeholder="••••••••">
               </div>
             </div>
             <div class="form-actions">
-              <button type="button" class="btn btn-outline" (click)="cancelarForm()">Cancelar</button>
-              <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-                {{ editandoId ? 'Actualizar' : 'Crear' }}
+              <button type="button" class="btn-secondary" (click)="cancelarForm()">Cancelar</button>
+              <button type="submit" class="btn-primary" [disabled]="form.invalid">
+                {{ editandoId ? 'Actualizar' : 'Crear Usuario' }}
               </button>
             </div>
           </form>
         </div>
       }
 
-      <!-- Users Table -->
-      <div class="table-card">
-        @if (cargando) {
-          <div class="loading">Cargando usuarios...</div>
-        } @else if (usuarios.length === 0) {
-          <div class="empty">No hay usuarios registrados.</div>
-        } @else {
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Identificación</th>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (u of usuarios; track u.id) {
-                <tr [class.inactive-row]="!u.activo">
-                  <td class="id-cell">#{{ u.id }}</td>
-                  <td>{{ u.identificacion }}</td>
-                  <td class="name-cell">{{ u.nombre }} {{ u.apellido }}</td>
-                  <td>{{ u.email }}</td>
-                  <td>
-                    <span class="badge" [class]="'badge-' + u.rol.toLowerCase()">
-                      {{ rolLabel(u.rol) }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="status-dot" [class.active]="u.activo" [class.inactive]="!u.activo"></span>
-                    {{ u.activo ? 'Activo' : 'Inactivo' }}
-                  </td>
-                  <td class="actions-cell">
-                    <button class="btn-sm btn-edit" (click)="editar(u)">✏️</button>
-                    @if (u.activo) {
-                      <button class="btn-sm btn-deactivate" (click)="desactivar(u.id)">🚫</button>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
-        <div class="table-footer">
-          Total: <strong>{{ usuarios.length }}</strong> usuarios
+      <!-- Users List -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Lista de Usuarios</h2>
+          <span class="badge-count">{{ usuarios.length }} usuarios</span>
         </div>
+        
+        @if (cargando) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Cargando usuarios...</p>
+          </div>
+        } @else if (usuarios.length === 0) {
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+            <p>No hay usuarios registrados</p>
+            <button class="btn-link" (click)="mostrarFormulario = true">Crear primer usuario</button>
+          </div>
+        } @else {
+          <div class="users-list">
+            @for (u of usuarios; track u.id) {
+              <div class="user-item" [class.inactive]="!u.activo">
+                <div class="user-avatar" [class]="'avatar-' + u.rol.toLowerCase()">
+                  {{ u.nombre.charAt(0) }}{{ u.apellido.charAt(0) }}
+                </div>
+                <div class="user-info">
+                  <div class="user-name">{{ u.nombre }} {{ u.apellido }}</div>
+                  <div class="user-meta">
+                    <span class="user-email">{{ u.email }}</span>
+                    <span class="user-id">ID: {{ u.identificacion }}</span>
+                  </div>
+                </div>
+                <div class="user-role">
+                  <span class="badge" [class]="'badge-' + u.rol.toLowerCase()">
+                    {{ rolLabel(u.rol) }}
+                  </span>
+                </div>
+                <div class="user-status">
+                  <span class="status-indicator" [class.active]="u.activo" [class.inactive]="!u.activo"></span>
+                  {{ u.activo ? 'Activo' : 'Inactivo' }}
+                </div>
+                <div class="user-actions">
+                  <button class="btn-icon" (click)="editar(u)" title="Editar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  @if (u.activo) {
+                    <button class="btn-icon btn-danger" (click)="desactivar(u.id)" title="Desactivar">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                      </svg>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
   `,
   styles: [`
-    .page { padding: 1.5rem; }
+    .page {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
     .page-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
     }
-    .page-title { font-size: 1.5rem; font-weight: 700; color: #1a237e; }
-    .btn {
-      padding: 0.55rem 1.25rem;
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text, #3d3d3d);
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-secondary, #6b6b6b);
+      font-size: 0.95rem;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.25rem;
+      background: var(--color-primary, #8b7355);
+      color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-md, 10px);
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
     }
-    .btn-primary { background: #1a237e; color: #fff; }
-    .btn-primary:hover { background: #283593; }
-    .btn-primary:disabled { background: #9fa8da; cursor: not-allowed; }
-    .btn-outline {
-      background: transparent;
-      border: 2px solid #c5cae9;
-      color: #1a237e;
-    }
-    .btn-outline:hover { border-color: #1a237e; background: #e8eaf6; }
 
+    .btn-primary:hover {
+      background: var(--color-primary-hover, #6d5a44);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      background: var(--color-border, #e0dcd5);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.25rem;
+      background: transparent;
+      color: var(--color-text-secondary, #6b6b6b);
+      border: 1px solid var(--color-border, #e0dcd5);
+      border-radius: var(--radius-md, 10px);
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-text-secondary, #6b6b6b);
+      background: var(--color-bg-alt, #edeae5);
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg, #f7f5f2);
+      border: none;
+      border-radius: var(--radius-sm, 6px);
+      color: var(--color-text-secondary, #6b6b6b);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      background: var(--color-bg-alt, #edeae5);
+      color: var(--color-text, #3d3d3d);
+    }
+
+    .btn-icon.btn-danger:hover {
+      background: #fef2f2;
+      color: var(--color-danger, #b85450);
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--color-primary, #8b7355);
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Alert */
     .alert {
-      padding: 0.85rem 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-md, 10px);
+      margin-bottom: 1.5rem;
       font-size: 0.9rem;
       font-weight: 500;
+      animation: fadeIn 0.3s ease-out;
     }
-    .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
-    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
 
+    .alert-error {
+      background: #fef2f2;
+      color: var(--color-danger, #b85450);
+      border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+      background: #f0fdf4;
+      color: var(--color-success, #5d8a66);
+      border: 1px solid #bbf7d0;
+    }
+
+    /* Form Card */
     .form-card {
-      background: #fff;
-      border-radius: 12px;
+      background: var(--color-card, #ffffff);
+      border-radius: var(--radius-lg, 16px);
+      border: 1px solid var(--color-border, #e0dcd5);
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-text, #3d3d3d);
       margin-bottom: 1.25rem;
     }
-    .form-card h2 { font-size: 1.1rem; color: #1a237e; margin-bottom: 1rem; font-weight: 600; }
+
     .form-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
     }
+
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.4rem;
     }
-    .form-group label { font-size: 0.85rem; font-weight: 600; color: #444; }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-text-secondary, #6b6b6b);
+    }
+
     .form-group input,
     .form-group select {
-      padding: 0.5rem 0.75rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--color-border, #e0dcd5);
+      border-radius: var(--radius-sm, 6px);
       font-size: 0.9rem;
+      color: var(--color-text, #3d3d3d);
+      background: var(--color-card, #ffffff);
+      transition: all 0.2s ease;
     }
-    .form-group input:focus, .form-group select:focus { border-color: #1a237e; outline: none; }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-primary, #8b7355);
+      box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+    }
+
+    .form-group input::placeholder {
+      color: var(--color-text-muted, #9a9a9a);
+    }
+
     .form-actions {
       display: flex;
       justify-content: flex-end;
       gap: 0.75rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #f0f0f0;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--color-border, #e0dcd5);
     }
 
-    .table-card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    /* Card */
+    .card {
+      background: var(--color-card, #ffffff);
+      border-radius: var(--radius-lg, 16px);
+      border: 1px solid var(--color-border, #e0dcd5);
       overflow: hidden;
     }
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th {
-      text-align: left;
-      padding: 0.75rem 1rem;
-      background: #f5f5f5;
-      color: #555;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 700;
-    }
-    .data-table td {
-      padding: 0.65rem 1rem;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 0.9rem;
-    }
-    .data-table tbody tr:hover { background: #f8f9ff; }
-    .inactive-row { opacity: 0.5; }
-    .id-cell { font-weight: 700; color: #1a237e; }
-    .name-cell { font-weight: 500; }
 
+    .card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--color-border, #e0dcd5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text, #3d3d3d);
+    }
+
+    .badge-count {
+      font-size: 0.8rem;
+      color: var(--color-text-muted, #9a9a9a);
+      background: var(--color-bg-alt, #edeae5);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+    }
+
+    /* Users List */
+    .users-list {
+      padding: 0.5rem;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: var(--radius-md, 10px);
+      transition: all 0.2s ease;
+    }
+
+    .user-item:hover {
+      background: var(--color-bg, #f7f5f2);
+    }
+
+    .user-item.inactive {
+      opacity: 0.5;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm, 6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .avatar-estudiante { background: #e8f4fd; color: #3b82b6; }
+    .avatar-docente { background: #f3e8fd; color: #8b5cf6; }
+    .avatar-administrativo { background: #fef3e2; color: #d97706; }
+    .avatar-responsable { background: #e8f5e9; color: #22863a; }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--color-text, #3d3d3d);
+      font-size: 0.95rem;
+    }
+
+    .user-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--color-text-muted, #9a9a9a);
+      margin-top: 0.2rem;
+    }
+
+    .user-role {
+      flex-shrink: 0;
+    }
+
+    /* Badges */
     .badge {
-      padding: 0.2rem 0.6rem;
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.3px;
+      text-transform: capitalize;
     }
-    .badge-estudiante { background: #e3f2fd; color: #1565c0; }
-    .badge-docente { background: #f3e5f5; color: #7b1fa2; }
-    .badge-administrativo { background: #fff3e0; color: #e65100; }
-    .badge-responsable { background: #e8f5e9; color: #2e7d32; }
 
-    .status-dot {
-      display: inline-block;
+    .badge-estudiante { background: #e8f4fd; color: #3b82b6; }
+    .badge-docente { background: #f3e8fd; color: #8b5cf6; }
+    .badge-administrativo { background: #fef3e2; color: #d97706; }
+    .badge-responsable { background: #e8f5e9; color: #22863a; }
+
+    .user-status {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--color-text-secondary, #6b6b6b);
+      min-width: 80px;
+    }
+
+    .status-indicator {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      margin-right: 0.35rem;
     }
-    .status-dot.active { background: #66bb6a; }
-    .status-dot.inactive { background: #ef5350; }
 
-    .actions-cell { display: flex; gap: 0.35rem; }
-    .btn-sm {
-      padding: 0.3rem 0.5rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-      background: #f5f5f5;
-    }
-    .btn-sm:hover { background: #e0e0e0; }
-    .btn-edit:hover { background: #e3f2fd; }
-    .btn-deactivate:hover { background: #ffebee; }
+    .status-indicator.active { background: var(--color-success, #5d8a66); }
+    .status-indicator.inactive { background: var(--color-danger, #b85450); }
 
-    .table-footer {
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      color: #888;
-      border-top: 1px solid #f0f0f0;
+    .user-actions {
+      display: flex;
+      gap: 0.35rem;
     }
-    .loading, .empty { text-align: center; padding: 3rem; color: #999; font-style: italic; }
+
+    /* Loading State */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      color: var(--color-text-muted, #9a9a9a);
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--color-border, #e0dcd5);
+      border-top-color: var(--color-primary, #8b7355);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--color-text-muted, #9a9a9a);
+    }
+
+    .empty-state svg {
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      margin-bottom: 0.75rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
 
     @media (max-width: 768px) {
-      .form-grid { grid-template-columns: 1fr; }
+      .page {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .user-item {
+        flex-wrap: wrap;
+      }
+
+      .user-meta {
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .user-status {
+        min-width: auto;
+      }
     }
   `]
 })
@@ -308,7 +620,7 @@ export class UsuarioListComponent implements OnInit {
     this.cargando = true;
     this.usuarioService.listarTodos().subscribe({
       next: res => {
-        this.usuarios = res.exito ? res.datos : [];
+        this.usuarios = res.exitoso ? res.datos : [];
         this.cargando = false;
       },
       error: () => { this.cargando = false; }
@@ -322,7 +634,7 @@ export class UsuarioListComponent implements OnInit {
 
     obs.subscribe({
       next: res => {
-        if (res.exito) {
+        if (res.exitoso) {
           this.show(this.editandoId ? 'Usuario actualizado' : 'Usuario creado exitosamente', false);
           this.cancelarForm();
           this.cargar();

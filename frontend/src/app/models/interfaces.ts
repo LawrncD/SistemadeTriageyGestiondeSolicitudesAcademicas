@@ -44,7 +44,7 @@ export interface SolicitudResponse {
 }
 
 export interface ApiResponse<T> {
-  exito: boolean;
+  exitoso: boolean;
   mensaje: string;
   datos: T;
   timestamp: string;

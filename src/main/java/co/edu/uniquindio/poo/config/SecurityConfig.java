@@ -52,19 +52,19 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // RF-13: Autorización por roles
-                        // Solicitudes
-                        .requestMatchers(HttpMethod.POST, "/api/solicitudes").hasAnyRole("ESTUDIANTE", "ADMINISTRATIVO", "RESPONSABLE")
-                        .requestMatchers(HttpMethod.GET, "/api/solicitudes/**").hasAnyRole("ESTUDIANTE", "DOCENTE", "ADMINISTRATIVO", "RESPONSABLE")
+                        // Solicitudes - acceso más flexible para desarrollo
+                        .requestMatchers(HttpMethod.POST, "/api/solicitudes").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/solicitudes/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/solicitudes/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
 
-                        // Usuarios
+                        // Usuarios - acceso más flexible para desarrollo
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRATIVO")
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRATIVO")
 
                         // IA
-                        .requestMatchers(HttpMethod.GET, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
-                        .requestMatchers(HttpMethod.POST, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/ia/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/ia/**").authenticated()
 
                         // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()

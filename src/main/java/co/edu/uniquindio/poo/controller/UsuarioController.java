@@ -77,6 +77,15 @@ public class UsuarioController {
     }
 
     /**
+     * Obtiene todos los usuarios activos (para seleccionar solicitante).
+     */
+    @GetMapping("/activos")
+    public ResponseEntity<ApiResponseDTO<List<UsuarioResponseDTO>>> obtenerUsuariosActivos() {
+        List<UsuarioResponseDTO> response = usuarioService.obtenerUsuariosActivos();
+        return ResponseEntity.ok(ApiResponseDTO.exitoso("Usuarios activos", response));
+    }
+
+    /**
      * Desactiva un usuario.
      */
     @PutMapping("/{id}/desactivar")
