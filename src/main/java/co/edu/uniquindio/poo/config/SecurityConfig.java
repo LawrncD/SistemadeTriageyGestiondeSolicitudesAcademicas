@@ -2,28 +2,41 @@ package co.edu.uniquindio.poo.config;
 
 import java.util.List;
 
+import co.edu.uniquindio.poo.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * Configuración de seguridad del sistema.
+ * Configuración de seguridad del sistema con JWT.
  * RF-13: Autorización básica de operaciones.
+ * Hito 3: Seguridad JWT implementada.
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final UserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,19 +46,36 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
+                        // Rutas públicas
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/solicitudes").hasAnyRole("ESTUDIANTE", "ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.GET, "/api/solicitudes/**").hasAnyRole("ESTUDIANTE", "DOCENTE", "ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.PUT, "/api/solicitudes/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRATIVO")
-                    .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
-                    .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRATIVO")
-                    .requestMatchers(HttpMethod.GET, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
-                    .requestMatchers(HttpMethod.POST, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
-                    .anyRequest().authenticated()
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // RF-13: Autorización por roles
+                        // Solicitudes
+                        .requestMatchers(HttpMethod.POST, "/api/solicitudes").hasAnyRole("ESTUDIANTE", "ADMINISTRATIVO", "RESPONSABLE")
+                        .requestMatchers(HttpMethod.GET, "/api/solicitudes/**").hasAnyRole("ESTUDIANTE", "DOCENTE", "ADMINISTRATIVO", "RESPONSABLE")
+                        .requestMatchers(HttpMethod.PUT, "/api/solicitudes/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
+
+                        // Usuarios
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRATIVO")
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRATIVO")
+
+                        // IA
+                        .requestMatchers(HttpMethod.GET, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/ia/**").hasAnyRole("ADMINISTRATIVO", "RESPONSABLE", "DOCENTE")
+
+                        // Cualquier otra petición requiere autenticación
+                        .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults());
+                // Configuración stateless para JWT (sin sesiones)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                // Agregar el filtro JWT antes del filtro de autenticación estándar
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -53,14 +83,28 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
     @Bean

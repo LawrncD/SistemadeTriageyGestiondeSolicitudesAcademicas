@@ -1,9 +1,14 @@
 package co.edu.uniquindio.poo.exception;
 
 import co.edu.uniquindio.poo.dto.response.ApiResponseDTO;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,6 +39,40 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponseDTO.error(ex.getMessage()));
     }
+
+    // ==================== EXCEPCIONES DE AUTENTICACIÓN JWT ====================
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponseDTO.error("Credenciales inválidas: email o contraseña incorrectos"));
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleUsernameNotFound(UsernameNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponseDTO.error("Usuario no encontrado"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponseDTO.error("Acceso denegado: no tiene permisos para esta operación"));
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleExpiredJwt(ExpiredJwtException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponseDTO.error("Token JWT expirado. Por favor, inicie sesión nuevamente"));
+    }
+
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleSignatureException(SignatureException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponseDTO.error("Token JWT inválido"));
+    }
+
+    // ==================== EXCEPCIONES DE VALIDACIÓN ====================
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponseDTO<Void>> handleValidation(MethodArgumentNotValidException ex) {
