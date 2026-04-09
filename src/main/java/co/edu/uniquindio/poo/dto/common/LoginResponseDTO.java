@@ -1,4 +1,4 @@
-package co.edu.uniquindio.poo.dto.response;
+package co.edu.uniquindio.poo.dto.common;
 
 import co.edu.uniquindio.poo.model.enums.Rol;
 import lombok.AllArgsConstructor;

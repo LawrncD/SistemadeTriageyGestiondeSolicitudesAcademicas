@@ -1,7 +1,7 @@
 package co.edu.uniquindio.poo.service;
 
-import co.edu.uniquindio.poo.dto.request.LoginRequestDTO;
-import co.edu.uniquindio.poo.dto.response.LoginResponseDTO;
+import co.edu.uniquindio.poo.dto.solicitud.LoginRequestDTO;
+import co.edu.uniquindio.poo.dto.common.LoginResponseDTO;
 import co.edu.uniquindio.poo.model.entity.Usuario;
 import co.edu.uniquindio.poo.repository.UsuarioRepository;
 import co.edu.uniquindio.poo.security.JwtService;

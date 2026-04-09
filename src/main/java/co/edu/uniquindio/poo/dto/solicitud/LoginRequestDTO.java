@@ -1,4 +1,4 @@
-package co.edu.uniquindio.poo.dto.request;
+package co.edu.uniquindio.poo.dto.solicitud;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
