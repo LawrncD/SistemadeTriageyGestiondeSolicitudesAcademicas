@@ -1,41 +1,60 @@
-# proyectofinal
+# Sistema de Triage y Gestión de Solicitudes Académicas
 
-Descripciín basisca de su Proyecto de POO ...
+Bienvenido al repositorio del backend para el **Sistema de Triage y Gestión de Solicitudes Académicas** del programa de Ingeniería de Sistemas y Computación.
 
-# Autores
+Esta implementación corresponde al **Hito 2** del cronograma oficial: *Backend y Lógica (Spring Boot, persistencia con ORM y motor de reglas)*.
 
-- Autor 1
-- Autor 2
+## 🚀 Tecnologías Utilizadas
+- **Java 17**
+- **Spring Boot 3.2.3**
+- **Spring Data JPA** (ORM)
+- **H2 Database** (En memoria)
+- **SpringDoc OpenAPI** (Swagger para documentación GUI)
+- **Lombok**
 
-# Herramientas
+## ⚙️ Instrucciones de Ejecución
 
-- [java 17](https://adoptium.net/es)
-- [junit 5.10.0](https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api/5.10.0)
-- [maven](https://maven.apache.org)
+1. Clona el repositorio y asegúrate de tener Java 17 y Maven instalados.
+2. Abre una terminal en la raíz del proyecto.
+3. Ejecuta el siguiente comando para levantar el servidor:
+   ```bash
+   mvn spring-boot:run
+   ```
+4. El servidor se iniciará en `http://localhost:8080`.
 
+## 🌐 Herramientas y Consolas Integradas
 
-# Construcción y pruebas
+Una vez que la aplicación esté corriendo, tienes a disposición las siguientes interfaces web:
 
-Para compilar el proyecto puede usar el comando:
+- **Swagger UI (Documentación Interactiva):**
+  [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+  *Desde aquí puedes realizar pruebas de envío y recepción a todos los endpoints.*
 
-```shell
-mvn clean compile
-```
+- **Consola H2 (Base de Datos):**
+  [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
+  *(Credenciales por defecto -> URL: jdbc:h2:mem:solicitudesdb | Username: sa | Password: [vacío])*
 
-Para ejecutar las pruebas puede usar el comando: 
+## 🧪 Pruebas del Hito 2 (Mock Authorization)
 
-```shell
- mvn clean test
-```
+Actualmente, el **Hito 3 (Seguridad y JWT)** está implementado a nivel de código, pero para facilitar de manera exclusiva la revisión del **Hito 2** sin lidiar con la firma de tokens persistentes, se incorporó una directiva "Backdoor" o **Mock de Cabecera**.
 
-Para generar el jar puede usar el comando: 
+Para realizar pruebas desde Swagger o Postman, simplemente deberás inyectar un **Header Adicional** en tu petición que simulará quién está operando:
 
-```shell
- mvn clean package
-```
+**Key del Header:** `X-Mock-User-Email`
+**Value (Emails de prueba pre-creados):**
 
-y para ejecutar el jar
+| Usuario de Prueba           | Rol            | Funciones Clave                        |
+|-----------------------------|----------------|----------------------------------------|
+| `juan.perez@uq.edu.co`      | `ESTUDIANTE`   | Registrar Solicitud, Consultar estados.|
+| `carlos.lopez@uq.edu.co`    | `RESPONSABLE`  | Cambiar Estados, Atender.              |
+| `ana.martinez@uq.edu.co`    | `ADMINISTRATIVO`| Crear y Asignar Usuarios responsables. |
 
-```shell
- java -jar target/proyectofinal-1.0.jar
-```
+### Ejemplo en Swagger:
+Al no haber interfaz de Login para el Hito 2, deberás hacer uso de este header directo para validar el **RF-13 (Restricción por Roles)**. Si abres Swagger, puedes pasar esta key en los campos habilitados para Headers.
+
+## 📦 Funcionalidades Implementadas (RF-01 al RF-13)
+- ✅ Registro de solicitudes académicas.
+- ✅ Clasificación, Priorización (manual / motor local) y Ciclo de Vida auditable.
+- ✅ Asignación de responsables y cambios de estado restringidos.
+- ✅ Módulo de Asistencia IA (Simulador local mediante heurísticas como base futura).
+- ✅ Tests unitarios en capas controladoras, repositorios e integraciones.
