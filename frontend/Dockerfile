@@ -1,37 +1,29 @@
-# ============================================================
-# Dockerfile para Frontend (Angular + Nginx)
-# ============================================================
-
-# ETAPA 1: BUILD
+# ---------- ETAPA 1: BUILD ----------
 FROM node:22-alpine AS build
-
-# Instalar Angular CLI globalmente para compilar
-RUN npm install -g @angular/cli@21.1.4
-
+ARG BASE_HREF=/
+ENV CI=true
 WORKDIR /app
 
-# Copiar archivos de dependencias e instalarlas
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --silent
 
-# Copiar código fuente y compilar para producción
 COPY . .
-RUN ng build --configuration production
+RUN npx ng build --configuration production --base-href=${BASE_HREF}
 
-# ETAPA 2: RUNTIME
-FROM nginx:1.27-alpine AS runtime
-LABEL maintainer="UniQuindío"
-LABEL description="Frontend del Sistema de Triage y Gestión de Solicitudes Académicas"
+# ---------- ETAPA 2: RUNTIME (Nginx con envsubst) ----------
+FROM nginx:stable-alpine AS runtime
+# Necesitamos gettext para envsubst
+RUN apk add --no-cache gettext
 
-# Eliminar configuración por defecto
-RUN rm /etc/nginx/conf.d/default.conf
+ENV NGINX_HTML_DIR=/usr/share/nginx/html
+WORKDIR /app
 
-# Copiar nuestra configuración personalizada
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Limpiar html por defecto y copiar build
+RUN rm -rf ${NGINX_HTML_DIR}/*
+COPY --from=build /app/dist/frontend/browser ${NGINX_HTML_DIR}
 
-# Copiar los compilados de Angular de la etapa build
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+# Copiar plantilla de nginx (plantilla con {{BACKEND_URL}})
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Entrypoint: sustituir variables y arrancar nginx
+CMD ["/bin/sh", "-c", "envsubst '${BACKEND_URL}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]

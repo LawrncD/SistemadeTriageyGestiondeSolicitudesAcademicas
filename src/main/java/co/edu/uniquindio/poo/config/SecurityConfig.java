@@ -89,7 +89,7 @@ public class SecurityConfig {
                 // Configuración stateless para JWT (sin sesiones)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Habilitar Basic Auth para pruebas de integración con httpBasic()
+                // Habilitar Basic Auth para pruebas de integración
                 .httpBasic(org.springframework.security.config.Customizer.withDefaults())
                 // Agregar el filtro JWT antes del filtro de autenticación estándar
                 .authenticationProvider(authenticationProvider())

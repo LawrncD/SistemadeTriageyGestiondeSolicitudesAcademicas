@@ -1,0 +1,9 @@
+# Railway Configuration
+# Este archivo configura las variables de entorno para el backend
+
+[build]
+builder = "dockerfile"
+dockerfile = "./Dockerfile"
+
+[deploy]
+startCommand = "java -jar /app/app.jar"

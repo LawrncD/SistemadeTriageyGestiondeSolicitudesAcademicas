@@ -2,213 +2,280 @@
 
 Bienvenido al repositorio oficial del **Sistema de Triage y Gestión de Solicitudes Académicas** del programa de Ingeniería de Sistemas y Computación.
 
-Esta implementación corresponde al **Hito 3 (Entrega Final)**: *Frontend en Angular, Seguridad JWT estricta, Base de Datos MariaDB e Integración real con Inteligencia Artificial (Gemini).*
+Esta implementación corresponde al **Hito 3 (Entrega Final)**: *Frontend en Angular, Seguridad JWT estricta, Base de Datos PostgreSQL e Integración real con Inteligencia Artificial (Gemini).*
 
 ---
 
 ## 🚀 Arquitectura y Tecnologías
-- **Backend**: Java 17, Spring Boot 3.2.3, Spring Security (JWT), Spring Data JPA.
-- **Frontend**: Angular 17+ (Standalone Components), Node.js, TypeScript.
-- **Base de Datos**: MariaDB.
-- **Inteligencia Artificial**: Google Gemini API (3.5 Flash).
-- **Diseño UI/UX**: Premium Dark Mode, Glassmorphism, CSS Variables Globales.
+
+- **Backend**: Java 17, Spring Boot 3.2.3, Spring Security (JWT), Spring Data JPA
+- **Frontend**: Angular 17+ (Standalone Components), Node.js, TypeScript
+- **Base de Datos**: PostgreSQL 16
+- **Inteligencia Artificial**: Google Gemini API (3.5 Flash)
+- **Contenedores**: Docker, Docker Compose
+- **CI/CD**: GitHub Actions
+- **Despliegue**: Railway (Backend), Vercel (Frontend)
 
 ---
 
-## 🛑 Prerrequisitos del Sistema
-Antes de ejecutar el proyecto, asegúrate de tener instalados los siguientes programas en tu equipo:
-1. **Java Development Kit (JDK) 17**: Configurado en tus variables de entorno (`JAVA_HOME`).
-2. **Maven**: Para compilar el backend.
-3. **Node.js (versión 18 o superior)**: Para compilar y levantar Angular.
-4. **MariaDB Server y HeidiSQL**: Para levantar y administrar el motor de base de datos relacional.
+## 🛑 Prerrequisitos
+
+### Para Desarrollo Local (sin Docker)
+- **Java 17** - JDK configurado en `JAVA_HOME`
+- **Maven 3.9+** - Para compilar el backend
+- **Node.js 18+** - Para Angular
+- **PostgreSQL 16** - Base de datos
+
+### Para Docker Local
+- **Docker** - Motor de contenedores
+- **Docker Compose** - Orquestación de contenedores
 
 ---
 
-## 🔑 Variables de Entorno (¡FUNDAMENTAL ANTES DE EJECUTAR!)
+## 🔑 Configuración de Variables de Entorno
 
-Para mantener la seguridad del sistema y no exponer credenciales en el código, es **estrictamente necesario** configurar las siguientes variables de entorno en tu sistema (o en la terminal) antes de levantar el backend:
+Copia `.env.example` a `.env` y completa los valores:
 
-- `DB_PASSWORD`: Contraseña de tu usuario en MariaDB (por defecto el usuario es `root`).
-- `JWT_SECRET`: Una cadena de texto segura (preferiblemente codificada en Base64) usada para firmar los tokens de autenticación.
-- `GEMINI_API_KEY`: Tu clave de API para Google Gemini, que puedes obtener en [Google AI Studio](https://aistudio.google.com/).
+```bash
+cp .env.example .env
+```
 
-**Ejemplo de cómo asignarlas temporalmente en Windows 11 (PowerShell):**
-```powershell
-$env:DB_PASSWORD="tu_password_de_mariadb"
-$env:JWT_SECRET="tu_secreto_jwt_en_base64_muy_seguro_y_largo_aqui="
-$env:GEMINI_API_KEY="tu_clave_de_gemini"
+**Variables requeridas:**
+```env
+DB_PASSWORD=tu_password_postgres
+JWT_SECRET=tu_jwt_secret_seguro_minimo_64_caracteres
+GEMINI_API_KEY=tu_gemini_api_key
 ```
 
 ---
 
-## ⚙️ Instrucciones Detalladas de Ejecución desde Cero
+## 📦 Opciones de Ejecución
 
-Sigue **exactamente** este orden para garantizar que el ecosistema completo se levante sin errores.
+### Opción 1: Docker Compose Local (Recomendado para Desarrollo)
 
-### PASO 1: Preparación de la Base de Datos (MariaDB)
-El proyecto utiliza MariaDB en lugar de una base en memoria para garantizar persistencia profesional.
-1. Abre tu servidor MariaDB.
-2. Entra a tu administrador de bases de datos (**HeidiSQL**).
-3. Conéctate usando:
-   - Host: `127.0.0.1`
-   - Puerto: `3307`
-   - Usuario: `root`
-   - Contraseña: la que definas en `DB_PASSWORD`
-4. Ejecuta el siguiente comando SQL para crear el esquema vacío:
-   ```sql
-   CREATE DATABASE solicitudesdb;
-   ```
+La forma más rápida de levantar todo el sistema localmente.
 
-### PASO 2: Despliegue del Backend (Spring Boot)
-1. Abre una terminal (PowerShell, CMD, o la terminal de VS Code) ubicada en la **carpeta principal** del repositorio (donde está el `pom.xml`).
-2. **Asegúrate de que las variables de entorno están asignadas** en esa misma terminal.
-3. Limpia, descarga dependencias y compila el proyecto ejecutando:
-   ```bash
-   mvn clean install -DskipTests
-   ```
-4. Una vez termine exitosamente, inicia el servidor ejecutando:
-   ```bash
-   mvn spring-boot:run
-   ```
-5. Espera a que la consola muestre el mensaje de que Tomcat ha iniciado en el puerto `8080`.
-   *(Nota: En su primer arranque, Hibernate creará todas las tablas en MariaDB automáticamente gracias a `ddl-auto=update`, y el sistema inyectará unos usuarios de prueba).*
+```bash
+# 1. Asegúrate de tener .env configurado
+cp .env.example .env
+# Edita .env con tus valores
 
-### PASO 3: Despliegue del Frontend Visual (Angular)
-1. Sin cerrar la terminal del Backend, abre una **segunda terminal** nueva.
-2. Navega hacia adentro de la carpeta del frontend:
-   ```bash
-   cd frontend
-   ```
-3. Instala todas las librerías de interfaz ejecutando:
-   ```bash
-   npm install
-   ```
-4. Inicia el servidor de desarrollo de Angular:
-   ```bash
-   ng serve
-   ```
-6. Espera a que el compilador termine. Abre tu navegador web favorito y entra a:
-   👉 **[http://localhost:4200](http://localhost:4200)**
+# 2. Levanta todos los servicios
+docker-compose up --build -d
 
-Verás en pantalla el **Sistema de Triage Académico** con su diseño premium oscuro y animación de entrada.
+# 3. Accede a la aplicación
+# Frontend: http://localhost/
+# API REST: http://localhost/api
+# Swagger UI: http://localhost/swagger-ui.html
+```
+
+**Detener servicios:**
+```bash
+docker-compose down
+```
+
+**Ver logs:**
+```bash
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
 
 ---
 
-## ☁️ Despliegue en la nube / Docker
-Esta aplicación está lista para ejecutarse con Docker y para usarse como una app completa en entornos compatibles con contenedores.
+### Opción 2: Despliegue en la Nube
 
-### 1. Crear el archivo `.env`
-Copia el archivo de ejemplo y completa los valores:
-```powershell
-copy .env.example .env
-```
-Edita el archivo `.env` y añade tus credenciales reales de:
-- `DB_PASSWORD`
-- `JWT_SECRET`
-- `GEMINI_API_KEY`
+#### Railway (Backend)
 
-> Si vas a ejecutar localmente, el backend usa `DB_URL` apuntando al servicio `mariadb` en Docker.
+El backend está desplegado automáticamente en Railway mediante CI/CD.
 
-### 2. Levantar todos los servicios con Docker Compose
-Desde la carpeta raíz del repositorio ejecuta:
-```powershell
-docker compose up --build -d
-```
+**URLs de Producción:**
+- 🔗 **API REST**: `https://sistematriageexperimental-production.up.railway.app/api`
+- 📚 **Swagger UI**: `https://sistematriageexperimental-production.up.railway.app/swagger-ui.html`
 
-### 3. Acceder a la aplicación en producción local
-- Frontend: **http://localhost/**
-- API proxyada: **http://localhost/api/**
+**Configuración en Railway:**
+1. Conecta tu repositorio de GitHub
+2. Configura las variables de entorno:
+   - `DATABASE_URL` - Conexión a PostgreSQL
+   - `JWT_SECRET` - Secreto JWT
+   - `GEMINI_API_KEY` - API key de Gemini
+3. El despliegue se ejecuta automáticamente en cada push a `main`
 
-### 4. Verificar el estado de los servicios
-```powershell
-docker compose ps
-```
+#### Vercel (Frontend)
 
-Para ver los logs del backend:
-```powershell
-docker compose logs -f backend
-```
+El frontend está desplegado automáticamente en Vercel mediante CI/CD.
 
-### 5. Detener el despliegue
-```powershell
-docker compose down
-```
+**URL de Producción:**
+- 🌐 **Aplicación**: `https://sistematriageexperimental.vercel.app`, CAMBIAR A LA API DE VERCEL DEL ORIGINAL 
 
-> En este modo Docker, el frontend y backend se sirven desde el mismo origen, por lo que el navegador no debe bloquear las llamadas por CORS.
+**Configuración en Vercel:**
+1. Conecta tu repositorio de GitHub
+2. Configura el build command: `npm install && npm run build -- --configuration production`
+3. El despliegue se ejecuta automáticamente en cada push a `main`
 
 ---
 
-## ☁️ CI/CD y despliegue en la nube
-Este repositorio incluye dos flujos de trabajo de GitHub Actions:
-- `.github/workflows/ci.yml`: compila y valida backend + frontend en cada `push` o `pull_request`.
-- `.github/workflows/cd.yml`: construye y publica imágenes Docker a GitHub Container Registry cuando se hace `push` a `main`.
+## 🔐 Usuarios de Prueba
 
-### Recomendación de despliegue cloud
-1. Conecta los contenedores generados en GHCR a tu proveedor de nube.
-2. Despliega el backend como un servicio de contenedor.
-3. Despliega el frontend con la imagen Nginx/Angular o usa el mismo stack `docker compose` en un VPS/Cloud Run/EC2.
-
-### Opciones válidas
-- **Railway**: despliega el backend como contenedor Docker o usando el repositorio con Dockerfile. Añade un plugin de MariaDB y configura las variables de entorno.
-- **Vercel**: despliega solo el frontend estático. Para que funcione, el frontend debe consumir un backend público y `environment.prod.ts` debe apuntar a la URL de ese backend.
-- **Servidor propio / VPS**: ejecuta `docker compose up --build -d` en la máquina.
-
-### Despliegue en Railway
-1. Crea un proyecto nuevo en Railway.
-2. Añade un plugin de MariaDB o una base de datos gestionada.
-3. Crea un servicio de contenedor Docker usando la imagen de backend:
-   - `ghcr.io/<tu-usuario>/triage-backend:latest`
-   o despliega desde el repositorio si Railway detecta tu `Dockerfile`.
-4. Agrega estas variables de entorno en Railway:
-   - `DB_URL` = la cadena JDBC que te da Railway (o `jdbc:mariadb://<host>:<port>/solicitudesdb`),
-   - `DB_USER`
-   - `DB_PASSWORD`
-   - `JWT_SECRET`
-   - `GEMINI_API_KEY`
-   - `APP_CORS_ALLOWED_ORIGIN_PATTERNS` = `https://<tu-frontend>.vercel.app,https://<tu-backend>.railway.app`
-5. Despliega y revisa los logs del servicio.
-
-### Despliegue en Vercel
-1. En Vercel, crea un proyecto nuevo y conecta tu repositorio.
-2. Configura el build command en `frontend`:
-   - `npm install && npm run build -- --configuration production`
-3. Asegúrate de que el backend esté desplegado en una URL pública.
-4. Antes de construir, actualiza `frontend/src/environments/environment.prod.ts` para usar la URL del backend:
-   - `apiUrl: 'https://<tu-backend>/api'`
-5. Publica el frontend en Vercel.
-
-> Nota: Si el frontend se sirve desde Vercel, la API debe estar en un dominio público y el backend debe autorizar ese origen en `APP_CORS_ALLOWED_ORIGIN_PATTERNS`.
-
-### Variables de entorno para producción
-Asegúrate de proporcionar todos estos valores en la nube:
-- `DB_URL` (ej. `jdbc:mariadb://mariadb:3306/solicitudesdb` o conexión a la base de datos gestionada)
-- `DB_USER`
-- `DB_PASSWORD`
-- `JWT_SECRET`
-- `GEMINI_API_KEY`
-- `APP_CORS_ALLOWED_ORIGIN_PATTERNS` (opcional, para dominios externos como Vercel o Railway)
-
-### Flujo recomendado para producción local y cloud
-1. Copia `.env.example` a `.env`.
-2. Ajusta los valores para tu entorno.
-3. Ejecuta `docker compose up --build -d`.
-4. Accede a `http://localhost/`.
+| Email | Contraseña | Rol |
+|-------|-----------|-----|
+| `juan.perez@uq.edu.co` | `123456` | ESTUDIANTE |
+| `carlos.lopez@uq.edu.co` | `123456` | RESPONSABLE |
+| `ana.martinez@uq.edu.co` | `admin123` | ADMINISTRATIVO |
 
 ---
 
-## 🔐 Ingreso al Sistema y Pruebas (Usuarios Demo)
-Al levantar el sistema por primera vez, el backend registra usuarios de prueba para que puedas acceder rápido.
+## 📚 Documentación de API
 
-En la pantalla de login (dev: `http://localhost:4200`, Docker: `http://localhost/`) usa cualquiera de los siguientes correos. La contraseña de todos es `123456`, excepto el administrativo que es `admin123`.
+### Swagger UI (Desarrollo Local)
+```
+http://localhost:8080/swagger-ui.html
+```
 
-| Usuario                     | Rol             | Contraseña | Qué puedes probar con él                         |
-|-----------------------------|-----------------|------------|--------------------------------------------------|
-| `juan.perez@uq.edu.co`      | `ESTUDIANTE`    | `123456`   | Crear radicación de solicitudes, ver sus estados |
-| `carlos.lopez@uq.edu.co`    | `RESPONSABLE`   | `123456`   | Atender solicitudes, usar IA, cambiar estados    |
-| `ana.martinez@uq.edu.co`    | `ADMINISTRATIVO`| `admin123` | Asignación y gestión general                     |
+### Swagger UI (Producción)
+```
+https://sistematriageexperimental-production.up.railway.app/swagger-ui.html
+```
 
-### 📚 Documentación de API (Swagger)
-Si deseas revisar la API directamente:
-1. Entra a: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-2. Haz un POST a `/api/auth/login` con uno de los usuarios de prueba.
-3. Copia el token y haz clic en **Authorize**.
+### Ejemplo de Llamada a la API
+
+```bash
+curl -X POST https://sistematriageexperimental-production.up.railway.app/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"ana.martinez@uq.edu.co","password":"admin123"}'
+```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+El repositorio incluye dos flujos de trabajo automáticos:
+
+### `.github/workflows/ci.yml`
+- Se ejecuta en cada `push` o `pull_request`
+- Compila y valida backend (Maven)
+- Compila y valida frontend (Angular)
+- Ejecuta tests unitarios
+
+### `.github/workflows/cd.yml`
+- Se ejecuta en cada `push` a `main`
+- Construye imágenes Docker
+- Publica en GitHub Container Registry (GHCR)
+- Despliega backend en Railway
+- Despliega frontend en Vercel
+
+---
+
+## 🧪 Ejecutar Tests Localmente
+
+```bash
+# Tests del backend
+mvn test
+
+# Tests del frontend
+cd frontend
+npm test
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+sistematriageexperimental/
+├── README.md                  # Este archivo
+├── .env.example               # Plantilla de variables de entorno
+├── docker-compose.yml         # Orquestación de contenedores
+├── docker-compose.dev.yml     # Configuración de desarrollo
+├── Dockerfile                 # (Eliminado - usar src/Dockerfile)
+├── src/
+│   ├── Dockerfile             # Backend (Maven + Java 17)
+│   ├── main/
+│   │   ├── java/              # Código fuente Java
+│   │   └── resources/         # Configuración y recursos
+│   └── test/                  # Tests unitarios
+├── frontend/
+│   ├── Dockerfile             # Frontend (Angular + Nginx)
+│   ├── src/                   # Código fuente Angular
+│   └── package.json           # Dependencias Node
+├── .github/
+│   └── workflows/
+│       ├── ci.yml             # Pipeline de integración continua
+│       └── cd.yml             # Pipeline de despliegue continuo
+└── pom.xml                    # Dependencias Maven
+```
+
+---
+
+## 🆘 Troubleshooting
+
+### Docker
+
+**Error: "Port 80 already in use"**
+```bash
+# Encuentra el proceso usando el puerto
+netstat -ano | findstr :80
+
+# Mata el proceso (reemplaza PID)
+taskkill /PID <PID> /F
+```
+
+**Error: "Cannot connect to Docker daemon"**
+- Verifica que Docker Desktop esté corriendo
+- En Linux, verifica que el servicio Docker esté activo: `sudo systemctl start docker`
+
+### Base de Datos
+
+**Error: "Connection refused" en PostgreSQL**
+- Verifica que PostgreSQL esté corriendo en el contenedor: `docker-compose ps`
+- Verifica las credenciales en `.env`
+
+### Frontend
+
+**Error: "npm not found"**
+- Reinstala Node.js desde https://nodejs.org/
+
+**Error: "Port 4200 already in use"**
+```bash
+# Encuentra el proceso
+netstat -ano | findstr :4200
+
+# Mata el proceso
+taskkill /PID <PID> /F
+```
+
+---
+
+## 📝 Notas Importantes
+
+- El archivo `.env` **NUNCA debe subirse a Git** (está en `.gitignore`)
+- En el primer arranque, Hibernate creará todas las tablas automáticamente
+- Los usuarios de prueba se crean automáticamente en la primera ejecución
+- Los logs se mostrarán en la consola o en `docker-compose logs`
+- El JWT_SECRET debe ser seguro y de mínimo 64 caracteres
+
+---
+
+## 🤝 Contribuciones
+
+Este es un proyecto académico. Para contribuir:
+
+1. Crea una rama desde `main`
+2. Realiza tus cambios
+3. Ejecuta tests: `mvn test`
+4. Haz commit con mensajes descriptivos
+5. Crea un Pull Request
+
+---
+
+## 📄 Licencia
+
+Proyecto académico de la Universidad del Quindío.
+
+---
+
+## � Soporte
+
+Para problemas o preguntas:
+- Revisa la documentación en este README
+- Consulta los logs: `docker-compose logs`
+- Verifica el Swagger UI para detalles de la API

@@ -37,6 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
+        final String requestMethod = request.getMethod();
+        final String requestPath = request.getRequestURI();
+
+        // Permitir solicitudes OPTIONS (CORS preflight) sin autenticación
+        if ("OPTIONS".equalsIgnoreCase(requestMethod)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Si no hay header Authorization o no empieza con "Bearer ", continuar sin autenticar
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -70,12 +78,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     // Establecer la autenticación en el contexto de seguridad
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    logger.debug("✓ JWT válido para usuario: " + userEmail + " en " + requestPath);
+                } else {
+                    logger.debug("⚠️  JWT inválido o expirado para usuario: " + userEmail + " en " + requestPath);
                 }
             }
         } catch (Exception e) {
             // Si hay error al procesar el token, simplemente no autenticamos
             // El filtro de seguridad se encargará de denegar el acceso si es necesario
-            logger.debug("Error procesando token JWT: " + e.getMessage());
+            logger.debug("⚠️  Error procesando token JWT en " + requestPath + ": " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

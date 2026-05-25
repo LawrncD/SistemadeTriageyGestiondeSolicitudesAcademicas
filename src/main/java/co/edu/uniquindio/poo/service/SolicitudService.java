@@ -149,22 +149,16 @@ public class SolicitudService {
         // RF-04: Validar transición de estado
         validarTransicion(solicitud, EstadoSolicitud.CLASIFICADA);
 
-        // RF-02: Establecer tipo para calcular prioridad sobre la solicitud clasificada
-        solicitud.setTipoSolicitud(request.getTipoSolicitud());
-
-        // RF-03: Calcular prioridad automáticamente basada en reglas
-        Object[] resultado = priorizacionService.calcularPrioridad(solicitud);
-        solicitud.clasificar(
-                request.getTipoSolicitud(),
-                (Prioridad) resultado[0],
-                (String) resultado[1]);
+        // RF-02: Clasificar SOLO asignando el tipo de solicitud
+        // NO asignar prioridad automáticamente - eso es un paso separado (RF-03)
+        solicitud.clasificar(request.getTipoSolicitud());
 
         // RF-06: Registrar en historial
         HistorialSolicitud historial = crearEntradaHistorial(
                 solicitud, usuario,
                 "Solicitud clasificada como: " + request.getTipoSolicitud(),
                 request.getObservaciones() != null ? request.getObservaciones()
-                        : "Prioridad asignada: " + solicitud.getPrioridad().getDescripcion());
+                        : "Clasificación completada. Pendiente de priorización.");
         solicitud.agregarHistorial(historial);
 
         solicitud = solicitudRepository.save(solicitud);
