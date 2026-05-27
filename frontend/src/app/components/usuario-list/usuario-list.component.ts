@@ -25,7 +25,7 @@ export class UsuarioListComponent implements OnInit, OnDestroy {
   editandoId: number | null = null;
   mensaje = '';
   esError = false;
-  roles = Object.values(Rol);
+  roles = Object.values(Rol).filter(r => r !== Rol.ADMINISTRATIVO);
 
   formUsuario: UsuarioRequest = {
     identificacion: '',
