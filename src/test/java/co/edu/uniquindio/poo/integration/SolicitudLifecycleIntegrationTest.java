@@ -52,7 +52,7 @@ class SolicitudLifecycleIntegrationTest {
 
         private static final String ESTUDIANTE_EMAIL = "juan.perez@uq.edu.co";
         private static final String ESTUDIANTE_PASS = "123456";
-        private static final String ADMIN_EMAIL = "ana.martinez@uq.edu.co";
+        private static final String ADMIN_EMAIL = "stefa@admin.uq.co";
         private static final String ADMIN_PASS = "admin123";
         private static final String RESPONSABLE_EMAIL = "carlos.lopez@uq.edu.co";
         private static final String RESPONSABLE_PASS = "123456";

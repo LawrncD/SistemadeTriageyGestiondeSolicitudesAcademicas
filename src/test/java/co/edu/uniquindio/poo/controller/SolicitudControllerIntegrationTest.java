@@ -52,7 +52,7 @@ class SolicitudControllerIntegrationTest {
         // Credenciales de usuarios cargados por DataInitConfig
         private static final String ESTUDIANTE_EMAIL = "juan.perez@uq.edu.co";
         private static final String ESTUDIANTE_PASS = "123456";
-        private static final String ADMIN_EMAIL = "ana.martinez@uq.edu.co";
+        private static final String ADMIN_EMAIL = "stefa@admin.uq.co";
         private static final String ADMIN_PASS = "admin123";
 
         // ==================== RF-01: REGISTRO ====================

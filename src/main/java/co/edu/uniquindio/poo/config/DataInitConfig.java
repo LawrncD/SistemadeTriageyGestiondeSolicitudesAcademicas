@@ -69,9 +69,17 @@ public class DataInitConfig {
             crearOActualizarUsuario(usuarioRepository, passwordEncoder, 
                 "pedro.ramirez@uq.edu.co", "8001234568", "Pedro", "Ramírez", Rol.RESPONSABLE, "123456");
 
-            // Administrativo: Ana Martínez
+            // Administrativo 1: Stefa
             crearOActualizarUsuario(usuarioRepository, passwordEncoder, 
-                "ana.martinez@uq.edu.co", "9001234567", "Ana", "Martínez", Rol.ADMINISTRATIVO, "admin123");
+                "stefa@admin.uq.co", "9001234567", "Stefa", "Admin", Rol.ADMINISTRATIVO, "admin123");
+
+            // Administrativo 2: Lawrence
+            crearOActualizarUsuario(usuarioRepository, passwordEncoder, 
+                "lawrence@admin.uq.co", "9001234568", "Lawrence", "Admin", Rol.ADMINISTRATIVO, "admin123");
+
+            // Administrativo 3: Aguirre
+            crearOActualizarUsuario(usuarioRepository, passwordEncoder, 
+                "aguirre@admin.uq.co", "9001234569", "Aguirre", "Admin", Rol.ADMINISTRATIVO, "admin123");
 
             System.out.println("✓ Usuarios de prueba listos");
         };

@@ -33,6 +33,12 @@ public class UsuarioService {
      * Registra un nuevo usuario en el sistema.
      */
     public UsuarioResponseDTO registrarUsuario(UsuarioRequestDTO request) {
+        // Validar que no intente crear un usuario administrativo
+        if (request.getRol() == Rol.ADMINISTRATIVO) {
+            throw new OperacionNoPermitidaException(
+                    "No está permitido crear usuarios con rol ADMINISTRATIVO");
+        }
+
         // Validar que no exista otro usuario con la misma identificación o email
         if (usuarioRepository.existsByIdentificacion(request.getIdentificacion())) {
             throw new OperacionNoPermitidaException(
@@ -141,6 +147,12 @@ public class UsuarioService {
      */
     public UsuarioResponseDTO actualizarUsuario(Long id, UsuarioRequestDTO request) {
         Usuario usuario = buscarUsuarioPorId(id);
+
+        // Validar que no intente cambiar el rol a ADMINISTRATIVO
+        if (request.getRol() == Rol.ADMINISTRATIVO && usuario.getRol() != Rol.ADMINISTRATIVO) {
+            throw new OperacionNoPermitidaException(
+                    "No está permitido cambiar el rol de un usuario a ADMINISTRATIVO");
+        }
 
         // Validar si el email pertenece a otro usuario
         if (!usuario.getEmail().equals(request.getEmail()) && usuarioRepository.existsByEmail(request.getEmail())) {
