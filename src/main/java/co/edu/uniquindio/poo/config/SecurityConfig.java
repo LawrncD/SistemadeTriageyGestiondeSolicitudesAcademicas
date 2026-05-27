@@ -52,8 +52,7 @@ public class SecurityConfig {
                         // Rutas públicas
                         .requestMatchers("/api").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/v3/api-docs/**")
-                        .permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // RF-13: Autorización por roles
