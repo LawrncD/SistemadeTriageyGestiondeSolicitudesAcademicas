@@ -163,7 +163,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           railway up \
-            --service sistematriageexperimental \
+            --service web \
             --detach
 
       # =====================================================
@@ -173,7 +173,7 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          SERVICE_ID="4df4156e-9819-4c3e-ae4b-3cf537a467aa"
+          SERVICE_ID="49b046e0-798c-429b-a1d1-c9a8fceeaf5f"
           sleep 20
           echo "Railway whoami (verificar token):"
           docker run --rm -e RAILWAY_TOKEN="${RAILWAY_TOKEN}" ghcr.io/railwayapp/cli:latest whoami || true
