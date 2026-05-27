@@ -24,14 +24,20 @@ public class DataInitConfig {
                               JdbcTemplate jdbcTemplate) {
         return args -> {
             try {
-                // Eliminar usuario administrativo antiguo
+                // Actualizar usuario administrativo antiguo a nuevo
                 var usuarioAntiguo = usuarioRepository.findByEmail("ana.martinez@uq.edu.co");
                 if (usuarioAntiguo.isPresent()) {
-                    usuarioRepository.delete(usuarioAntiguo.get());
-                    System.out.println("✓ Usuario antiguo (ana.martinez@uq.edu.co) eliminado");
+                    Usuario admin = usuarioAntiguo.get();
+                    admin.setEmail("stefa@admin.uq.co");
+                    admin.setIdentificacion("9001234567");
+                    admin.setNombre("Stefa");
+                    admin.setApellido("Admin");
+                    admin.setPassword(passwordEncoder.encode("admin123"));
+                    usuarioRepository.save(admin);
+                    System.out.println("✓ Usuario administrativo actualizado a stefa@admin.uq.co");
                 }
             } catch (Exception e) {
-                System.out.println("⚠ No se pudo eliminar usuario antiguo: " + e.getMessage());
+                System.out.println("⚠ No se pudo actualizar usuario administrativo: " + e.getMessage());
             }
 
             try {
@@ -82,15 +88,15 @@ public class DataInitConfig {
 
             // Administrativo 1: Stefa
             crearOActualizarUsuario(usuarioRepository, passwordEncoder, 
-                "stefa@admin.uq.co", "9001234567", "Stefa", "Admin", Rol.ADMINISTRATIVO, "admin123");
+                "stefa@admin.uq.co", "9000000001", "Stefa", "Admin", Rol.ADMINISTRATIVO, "admin123");
 
             // Administrativo 2: Lawrence
             crearOActualizarUsuario(usuarioRepository, passwordEncoder, 
-                "lawrence@admin.uq.co", "9001234568", "Lawrence", "Admin", Rol.ADMINISTRATIVO, "admin123");
+                "lawrence@admin.uq.co", "9000000002", "Lawrence", "Admin", Rol.ADMINISTRATIVO, "admin123");
 
             // Administrativo 3: Aguirre
             crearOActualizarUsuario(usuarioRepository, passwordEncoder, 
-                "aguirre@admin.uq.co", "9001234569", "Aguirre", "Admin", Rol.ADMINISTRATIVO, "admin123");
+                "aguirre@admin.uq.co", "9000000003", "Aguirre", "Admin", Rol.ADMINISTRATIVO, "admin123");
 
             System.out.println("✓ Usuarios de prueba listos");
         };
