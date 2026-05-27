@@ -24,23 +24,6 @@ public class DataInitConfig {
                               JdbcTemplate jdbcTemplate) {
         return args -> {
             try {
-                // Actualizar usuario administrativo antiguo a nuevo
-                var usuarioAntiguo = usuarioRepository.findByEmail("ana.martinez@uq.edu.co");
-                if (usuarioAntiguo.isPresent()) {
-                    Usuario admin = usuarioAntiguo.get();
-                    admin.setEmail("stefa@admin.uq.co");
-                    admin.setIdentificacion("9001234567");
-                    admin.setNombre("Stefa");
-                    admin.setApellido("Admin");
-                    admin.setPassword(passwordEncoder.encode("admin123"));
-                    usuarioRepository.save(admin);
-                    System.out.println("✓ Usuario administrativo actualizado a stefa@admin.uq.co");
-                }
-            } catch (Exception e) {
-                System.out.println("⚠ No se pudo actualizar usuario administrativo: " + e.getMessage());
-            }
-
-            try {
                 // Actualizar usuarios con rol obsoleto DOCENTE a RESPONSABLE
                 jdbcTemplate.execute("UPDATE usuarios SET rol = 'RESPONSABLE' WHERE rol = 'DOCENTE'");
                 System.out.println("✓ Migración completada: DOCENTE -> RESPONSABLE");

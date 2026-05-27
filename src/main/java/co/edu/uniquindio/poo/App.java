@@ -29,8 +29,9 @@ public class App {
         SpringApplication.run(App.class, args);
         System.out.println("============================================================");
         System.out.println("  Sistema de Triage y Gestión de Solicitudes Académicas");
-        System.out.println("  API REST disponible en: http://localhost:8080/api");
-        System.out.println("  Swagger UI: http://localhost:8080/swagger-ui.html");
+        System.out.println("  API REST disponible en:https://web-production-9ae79.up.railway.app/api");
+        System.out.println("  Swagger UI: https://web-production-9ae79.up.railway.app/swagger-ui.html" + //
+                        "");
         System.out.println("  Base de Datos: PostgreSQL en Railway");
         System.out.println("============================================================");
     }
