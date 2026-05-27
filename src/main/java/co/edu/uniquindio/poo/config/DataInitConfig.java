@@ -24,6 +24,17 @@ public class DataInitConfig {
                               JdbcTemplate jdbcTemplate) {
         return args -> {
             try {
+                // Eliminar usuario administrativo antiguo
+                var usuarioAntiguo = usuarioRepository.findByEmail("ana.martinez@uq.edu.co");
+                if (usuarioAntiguo.isPresent()) {
+                    usuarioRepository.delete(usuarioAntiguo.get());
+                    System.out.println("✓ Usuario antiguo (ana.martinez@uq.edu.co) eliminado");
+                }
+            } catch (Exception e) {
+                System.out.println("⚠ No se pudo eliminar usuario antiguo: " + e.getMessage());
+            }
+
+            try {
                 // Actualizar usuarios con rol obsoleto DOCENTE a RESPONSABLE
                 jdbcTemplate.execute("UPDATE usuarios SET rol = 'RESPONSABLE' WHERE rol = 'DOCENTE'");
                 System.out.println("✓ Migración completada: DOCENTE -> RESPONSABLE");
