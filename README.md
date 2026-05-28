@@ -2,7 +2,15 @@
 
 Bienvenido al repositorio oficial del **Sistema de Triage y Gestión de Solicitudes Académicas** del programa de Ingeniería de Sistemas y Computación.
 
-Esta implementación corresponde al **Hito 3 (Entrega Final)**: *Frontend en Angular, Seguridad JWT estricta, Base de Datos PostgreSQL e Integración real con Inteligencia Artificial (Gemini).*
+Esta implementación corresponde al **Hito 3 (Entrega Final)**: *Frontend en Angular, Seguridad JWT estricta, Base de Datos PostgreSQL, Integración real con Inteligencia Artificial (Gemini) y Despliegue en la nube con Railway y vercel*
+
+---
+
+## Autores
+
+Stefania Herrera 
+Lawrence Daniel
+Santiago Aguirre
 
 ---
 
@@ -89,30 +97,15 @@ docker-compose logs -f frontend
 El backend está desplegado automáticamente en Railway mediante CI/CD.
 
 **URLs de Producción:**
-- 🔗 **API REST**: `https://sistematriageexperimental-production.up.railway.app/api`
-- 📚 **Swagger UI**: `https://sistematriageexperimental-production.up.railway.app/swagger-ui.html`
-
-**Configuración en Railway:**
-1. Conecta tu repositorio de GitHub
-2. Configura las variables de entorno:
-   - `DATABASE_URL` - Conexión a PostgreSQL
-   - `JWT_SECRET` - Secreto JWT
-   - `GEMINI_API_KEY` - API key de Gemini
-3. El despliegue se ejecuta automáticamente en cada push a `main`
+- 🔗 **API REST**: `https://web-production-9ae79.up.railway.app/api`
+- 📚 **Swagger UI**: `https://web-production-9ae79.up.railway.app/swagger-ui.html`
 
 #### Vercel (Frontend)
 
 El frontend está desplegado automáticamente en Vercel mediante CI/CD.
 
 **URL de Producción:**
-- 🌐 **Aplicación**: `https://sistematriageexperimental.vercel.app`, CAMBIAR A LA API DE VERCEL DEL ORIGINAL 
-
-**Configuración en Vercel:**
-1. Conecta tu repositorio de GitHub
-2. Configura el build command: `npm install && npm run build -- --configuration production`
-3. El despliegue se ejecuta automáticamente en cada push a `main`
-
----
+- 🌐 **Aplicación**: `https://sistemade-triagey-gestionde-solicit.vercel.app`
 
 ## 🔐 Usuarios de Prueba
 
@@ -120,28 +113,15 @@ El frontend está desplegado automáticamente en Vercel mediante CI/CD.
 |-------|-----------|-----|
 | `juan.perez@uq.edu.co` | `123456` | ESTUDIANTE |
 | `carlos.lopez@uq.edu.co` | `123456` | RESPONSABLE |
-| `ana.martinez@uq.edu.co` | `admin123` | ADMINISTRATIVO |
 
 ---
-
-## 📚 Documentación de API
-
-### Swagger UI (Desarrollo Local)
-```
-http://localhost:8080/swagger-ui.html
-```
-
-### Swagger UI (Producción)
-```
-https://sistematriageexperimental-production.up.railway.app/swagger-ui.html
-```
 
 ### Ejemplo de Llamada a la API
 
 ```bash
-curl -X POST https://sistematriageexperimental-production.up.railway.app/api/auth/login \
+curl -X POST https://web-production-9ae79.up.railway.app/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"ana.martinez@uq.edu.co","password":"admin123"}'
+  -d '{"email":"juan.perez@uq.edu.co","password":"123456"}'
 ```
 
 ---
@@ -255,27 +235,8 @@ taskkill /PID <PID> /F
 
 ---
 
-## 🤝 Contribuciones
-
-Este es un proyecto académico. Para contribuir:
-
-1. Crea una rama desde `main`
-2. Realiza tus cambios
-3. Ejecuta tests: `mvn test`
-4. Haz commit con mensajes descriptivos
-5. Crea un Pull Request
-
----
-
 ## 📄 Licencia
 
 Proyecto académico de la Universidad del Quindío.
 
 ---
-
-## � Soporte
-
-Para problemas o preguntas:
-- Revisa la documentación en este README
-- Consulta los logs: `docker-compose logs`
-- Verifica el Swagger UI para detalles de la API
