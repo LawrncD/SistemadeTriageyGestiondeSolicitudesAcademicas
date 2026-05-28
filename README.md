@@ -9,7 +9,9 @@ Esta implementación corresponde al **Hito 3 (Entrega Final)**: *Frontend en Ang
 ## Autores
 
 Stefania Herrera 
+
 Lawrence Daniel
+
 Santiago Aguirre
 
 ---
