@@ -77,6 +77,8 @@ docker-compose up --build -d
 # Frontend: http://localhost/
 # API REST: http://localhost/api
 # Swagger UI: http://localhost/swagger-ui.html
+#- **API Docs (OpenAPI)**: `http://localhost/v3/api-docs`
+
 ```
 
 **Detener servicios:**
@@ -101,6 +103,7 @@ El backend está desplegado automáticamente en Railway mediante CI/CD.
 **URLs de Producción:**
 - 🔗 **API REST**: `https://web-production-9ae79.up.railway.app/api`
 - 📚 **Swagger UI**: `https://web-production-9ae79.up.railway.app/swagger-ui.html`
+- **API Docs (OpenAPI)**: `https://web-production-9ae79.up.railway.app/v3/api-docs`
 
 #### Vercel (Frontend)
 
